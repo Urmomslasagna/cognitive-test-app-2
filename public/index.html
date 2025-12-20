@@ -1,0 +1,2777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>Cognitive Health Screening</title>
+    <style>
+        :root {
+            --primary-color: #2c5aa0;
+            --secondary-color: #6c757d;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --text-size-base: 16px;
+            --spacing-base: 0.75rem;
+            --spacing-large: 1.25rem;
+            --button-min-height: 50px;
+        }
+
+        /* Mobile first design */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            font-size: var(--text-size-base);
+            line-height: 1.5;
+            color: #333;
+            background: #f5f5f5;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: var(--spacing-base);
+        }
+
+        /* Accessibility bar - mobile optimized */
+        .accessibility-bar {
+            background: white;
+            padding: 10px;
+            border-bottom: 2px solid #ddd;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .accessibility-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .control-group {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .language-selector {
+            display: flex;
+            gap: 5px;
+            justify-content: center;
+        }
+
+        .lang-btn {
+            padding: 8px 12px;
+            border: 2px solid var(--primary-color);
+            background: white;
+            color: var(--primary-color);
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: all 0.3s;
+            touch-action: manipulation;
+        }
+
+        .lang-btn.active {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        /* Text size controls - mobile friendly */
+        .text-size-controls {
+            display: flex;
+            gap: 5px;
+            justify-content: center;
+        }
+
+        .text-size-controls button {
+            width: 40px;
+            height: 40px;
+            font-size: 18px;
+            border: 2px solid var(--primary-color);
+            background: white;
+            color: var(--primary-color);
+            cursor: pointer;
+            border-radius: 5px;
+            touch-action: manipulation;
+        }
+
+        /* Main content */
+        .main-content {
+            background: white;
+            border-radius: 10px;
+            padding: var(--spacing-base);
+            margin-top: var(--spacing-base);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: var(--spacing-base);
+            font-size: 1.5em;
+            text-align: center;
+        }
+
+        h2 {
+            color: var(--primary-color);
+            margin-bottom: var(--spacing-base);
+            font-size: 1.25em;
+            text-align: center;
+        }
+
+        /* Test cards - mobile optimized */
+        .test-selection {
+            display: grid;
+            gap: var(--spacing-base);
+            margin-top: var(--spacing-base);
+        }
+
+        .test-card {
+            background: #f8f9fa;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: var(--spacing-base);
+            cursor: pointer;
+            transition: all 0.3s;
+            touch-action: manipulation;
+        }
+
+        .test-card:active {
+            transform: scale(0.98);
+            background: #e9ecef;
+        }
+
+        .test-card h3 {
+            color: var(--primary-color);
+            margin-bottom: 8px;
+            font-size: 1.1em;
+        }
+
+        .test-card p {
+            font-size: 0.9em;
+            margin: 5px 0;
+        }
+
+        .test-duration {
+            color: var(--secondary-color);
+            font-size: 0.85em;
+            margin-top: 8px;
+        }
+
+        /* Buttons - mobile optimized */
+        .button {
+            min-height: var(--button-min-height);
+            padding: 12px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            touch-action: manipulation;
+        }
+
+        .button:active {
+            transform: scale(0.98);
+        }
+
+        .button-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .button-secondary {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        .button-success {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .button-warning {
+            background: var(--warning-color);
+            color: #333;
+        }
+
+        /* Test interface */
+        .test-interface {
+            display: none;
+            animation: fadeIn 0.3s;
+        }
+
+        .test-interface.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .progress-bar {
+            background: #e0e0e0;
+            height: 25px;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: var(--spacing-base);
+        }
+
+        .progress-fill {
+            background: var(--primary-color);
+            height: 100%;
+            transition: width 0.5s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        /* Word display */
+        .word-item {
+            background: #f0f4f8;
+            padding: 20px;
+            border-radius: 8px;
+            font-size: 1.3em;
+            text-align: center;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin: var(--spacing-base) 0;
+        }
+
+        /* Input groups - mobile optimized */
+        .input-group {
+            margin: var(--spacing-base) 0;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--primary-color);
+            font-size: 0.95em;
+        }
+
+        .input-group input[type="text"],
+        .input-group input[type="number"] {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px; /* Prevents zoom on iOS */
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            transition: border-color 0.3s;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(44, 90, 160, 0.1);
+        }
+
+        /* Trail canvas - mobile responsive */
+        #trailCanvas {
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            background: white;
+            display: block;
+            margin: 0 auto;
+            cursor: pointer;
+            touch-action: none;
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* Trail test instructions - mobile */
+        .trail-options {
+            display: grid;
+            gap: var(--spacing-base);
+            margin: var(--spacing-base) 0;
+        }
+
+        .trail-option {
+            background: #e3f2fd;
+            padding: var(--spacing-base);
+            border-radius: 10px;
+            border: 2px solid #2196F3;
+        }
+
+        .trail-option h3 {
+            color: #1976D2;
+            margin-bottom: 8px;
+            font-size: 1.05em;
+        }
+
+        .trail-option p {
+            margin: 8px 0;
+            font-size: 0.9em;
+        }
+
+        .trail-option-b {
+            background: #fff3e0;
+            border-color: #ff9800;
+        }
+
+        .trail-option-b h3 {
+            color: #f57c00;
+        }
+
+        /* Trail controls */
+        .trail-stats {
+            display: flex;
+            gap: 10px;
+            justify-content: space-around;
+            margin-bottom: var(--spacing-base);
+            flex-wrap: wrap;
+        }
+
+        .stat-box {
+            background: #f5f5f5;
+            padding: 8px 15px;
+            border-radius: 5px;
+            font-size: 0.9em;
+            flex: 1;
+            min-width: 100px;
+            text-align: center;
+        }
+
+        /* Results section */
+        .results-section {
+            display: none;
+            text-align: center;
+            padding: var(--spacing-base);
+        }
+
+        .results-section.active {
+            display: block;
+        }
+
+        .result-card {
+            background: white;
+            border-radius: 10px;
+            padding: var(--spacing-base);
+            margin: var(--spacing-base) 0;
+            border: 3px solid;
+        }
+
+        .result-pass {
+            border-color: var(--success-color);
+            background: #d4edda;
+        }
+
+        .result-concern {
+            border-color: var(--warning-color);
+            background: #fff3cd;
+        }
+
+        .result-fail {
+            border-color: var(--danger-color);
+            background: #f8d7da;
+        }
+
+        .result-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+        }
+
+        .result-message {
+            font-size: 1em;
+            line-height: 1.5;
+            margin: var(--spacing-base) 0;
+        }
+
+        /* Disclaimer */
+        .disclaimer {
+            background: #f8f9fa;
+            border-left: 4px solid var(--primary-color);
+            padding: var(--spacing-base);
+            margin: var(--spacing-base) 0;
+            font-size: 0.85em;
+            color: #666;
+        }
+
+        /* Loading spinner */
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Button group */
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: var(--spacing-base);
+        }
+
+        /* Session info */
+        #sessionInfo {
+            margin-top: var(--spacing-base);
+            padding: 10px;
+            background: #f0f0f0;
+            border-radius: 5px;
+            font-size: 0.8em;
+            text-align: center;
+            word-break: break-all;
+        }
+
+        /* Feedback */
+        #trailFeedback {
+            margin-top: var(--spacing-base);
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        /* Animal list */
+        #animalList {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-top: var(--spacing-base);
+        }
+
+        #animalList span {
+            display: inline-block;
+            padding: 5px 10px;
+            background: #e0e0e0;
+            border-radius: 15px;
+            font-size: 0.9em;
+        }
+
+        /* Tablet styles */
+        @media (min-width: 768px) {
+            :root {
+                --text-size-base: 18px;
+                --spacing-base: 1rem;
+                --spacing-large: 1.5rem;
+                --button-min-height: 55px;
+            }
+            
+            .container {
+                padding: var(--spacing-large);
+            }
+            
+            h1 { font-size: 2em; }
+            h2 { font-size: 1.5em; }
+            
+            .accessibility-controls {
+                flex-direction: row;
+                justify-content: space-between;
+            }
+            
+            .test-selection {
+                gap: var(--spacing-large);
+            }
+            
+            .trail-options {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .button-group {
+                flex-direction: row;
+                justify-content: center;
+            }
+            
+            .button {
+                width: auto;
+                min-width: 150px;
+            }
+            
+            #trailCanvas {
+                width: 700px;
+                height: 500px;
+            }
+        }
+
+        /* Desktop styles */
+        @media (min-width: 1024px) {
+            #trailCanvas {
+                width: 800px;
+                height: 600px;
+            }
+            
+            .main-content {
+                padding: var(--spacing-large);
+            }
+        }
+
+        /* Landscape phone */
+        @media (max-width: 767px) and (orientation: landscape) {
+            .accessibility-bar {
+                padding: 5px;
+            }
+            
+            .main-content {
+                margin-top: 5px;
+                padding: 10px;
+            }
+            
+            h1 { font-size: 1.3em; }
+            h2 { font-size: 1.15em; }
+            
+            #trailCanvas {
+                height: 250px;
+            }
+        }
+
+        /* High contrast mode */
+        body.high-contrast {
+            --primary-color: #000080;
+            --secondary-color: #000000;
+            background: white;
+            color: black;
+        }
+
+        body.high-contrast button {
+            border: 3px solid black;
+        }
+
+        /* Touch feedback */
+        @media (hover: none) {
+            .test-card:hover {
+                transform: none;
+            }
+            
+            .button:hover {
+                transform: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="accessibility-bar">
+        <div class="accessibility-controls">
+            <div class="control-group">
+                <label for="language" style="font-weight: 600; font-size: 14px;">Language:</label>
+                <div class="language-selector" role="group" aria-label="Language selection">
+                    <button class="lang-btn active" data-lang="en">EN</button>
+                    <button class="lang-btn" data-lang="es">ES</button>
+                    <button class="lang-btn" data-lang="zh">中文</button>
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <div class="text-size-controls" role="group" aria-label="Text size">
+                    <button onclick="changeTextSize('decrease')">A-</button>
+                    <button onclick="changeTextSize('reset')">A</button>
+                    <button onclick="changeTextSize('increase')">A+</button>
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <button class="button button-secondary" onclick="toggleHighContrast()" style="min-height: 35px; padding: 8px 15px; font-size: 14px;">
+                    🔲 <span data-translate="high-contrast">High Contrast</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <main id="main" class="main-content">
+            <!-- Home Screen -->
+            <div id="homeScreen" class="screen active">
+                <h1 data-translate="title">Cognitive Health Screening</h1>
+                <p data-translate="intro" style="text-align: center; margin-bottom: 15px;">Quick tests to check your cognitive health. Takes 10-15 minutes.</p>
+                
+                <div class="disclaimer">
+                    <strong data-translate="disclaimer-title">Important:</strong>
+                    <span data-translate="disclaimer-text">Screening tool only. Consult a healthcare provider.</span>
+                </div>
+
+                <h2 data-translate="select-test">Select a Test:</h2>
+                
+                <div class="test-selection">
+                    <div class="test-card" onclick="startTest('memory')">
+                        <h3 data-translate="memory-test-title">Memory Test</h3>
+                        <p data-translate="memory-test-desc">Remember common words</p>
+                        <p class="test-duration" data-translate="memory-test-duration">5 minutes</p>
+                    </div>
+                    
+                    <div class="test-card" onclick="startTest('trail')">
+                        <h3 data-translate="trail-test-title">Trail Making Test</h3>
+                        <p data-translate="trail-test-desc">Connect circles in order</p>
+                        <p class="test-duration" data-translate="trail-test-duration">3-5 minutes</p>
+                    </div>
+                    
+                    <div class="test-card" onclick="startTest('fluency')">
+                        <h3 data-translate="fluency-test-title">Fluency Test</h3>
+                        <p data-translate="fluency-test-desc">Name animals quickly</p>
+                        <p class="test-duration" data-translate="fluency-test-duration">2 minutes</p>
+                    </div>
+
+                    <div class="test-card" onclick="startTest('orientation')">
+                        <h3 data-translate="orientation-test-title">Orientation Test</h3>
+                        <p data-translate="orientation-test-desc">Answer date and place questions</p>
+                        <p class="test-duration" data-translate="orientation-test-duration">1 minute</p>
+                    </div>
+
+                    <div class="test-card" onclick="startTest('naming')">
+                        <h3 data-translate="naming-test-title">Naming Test</h3>
+                        <p data-translate="naming-test-desc">Identify animals from descriptions</p>
+                        <p class="test-duration" data-translate="naming-test-duration">1 minute</p>
+                    </div>
+
+                    <div class="test-card" onclick="startTest('digitSpan')">
+                        <h3 data-translate="digit-span-test-title">Digit Span Test</h3>
+                        <p data-translate="digit-span-test-desc">Repeat number sequences</p>
+                        <p class="test-duration" data-translate="digit-span-test-duration">2 minutes</p>
+                    </div>
+
+                    <div class="test-card" onclick="startTest('serial7')">
+                        <h3 data-translate="serial7-test-title">Serial 7 Test</h3>
+                        <p data-translate="serial7-test-desc">Subtract 7 from 100</p>
+                        <p class="test-duration" data-translate="serial7-test-duration">1 minute</p>
+                    </div>
+
+                    <div class="test-card" onclick="startTest('vigilance')">
+                        <h3 data-translate="vigilance-test-title">Attention Test</h3>
+                        <p data-translate="vigilance-test-desc">Tap when you see letter A</p>
+                        <p class="test-duration" data-translate="vigilance-test-duration">1 minute</p>
+                    </div>
+
+                    <div class="test-card" onclick="startTest('abstraction')">
+                        <h3 data-translate="abstraction-test-title">Abstraction Test</h3>
+                        <p data-translate="abstraction-test-desc">Find similarities between items</p>
+                        <p class="test-duration" data-translate="abstraction-test-duration">1 minute</p>
+                    </div>
+
+                    <div class="test-card" onclick="startTest('repetition')">
+                        <h3 data-translate="repetition-test-title">Repetition Test</h3>
+                        <p data-translate="repetition-test-desc">Repeat sentences exactly</p>
+                        <p class="test-duration" data-translate="repetition-test-duration">2 minutes</p>
+                    </div>
+
+                    <div class="test-card" onclick="startTest('letterFluency')">
+                        <h3 data-translate="letter-fluency-test-title">Letter Fluency Test</h3>
+                        <p data-translate="letter-fluency-test-desc">Name words starting with F</p>
+                        <p class="test-duration" data-translate="letter-fluency-test-duration">1 minute</p>
+                    </div>
+                </div>
+
+                <div id="sessionInfo" style="display: none;">
+                    <span data-translate="session-id">Session:</span> <span id="currentSessionId"></span>
+                </div>
+            </div>
+
+            <!-- Memory Test -->
+            <div id="memoryTest" class="test-interface">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="memoryProgress">0%</div>
+                </div>
+                
+                <h2 data-translate="memory-test-header">Memory Test</h2>
+                
+                <div id="memoryPhase1" class="test-phase">
+                    <p data-translate="memory-instructions" style="text-align: center;">Watch 10 words. Remember as many as you can.</p>
+                    <button class="button button-primary" onclick="showMemoryWords()">
+                        <span data-translate="start-test">Start</span>
+                    </button>
+                </div>
+
+                <div id="memoryPhase2" class="test-phase" style="display: none;">
+                    <div id="wordDisplay"></div>
+                </div>
+
+                <div id="memoryPhase3" class="test-phase" style="display: none;">
+                    <p data-translate="memory-recall" style="text-align: center;">Type the words you remember:</p>
+                    <div class="input-group">
+                        <input type="text" id="recallInput" placeholder="Enter words separated by commas">
+                    </div>
+                    <button class="button button-primary" onclick="submitMemoryTest()">
+                        <span data-translate="submit">Submit</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Trail Making Test -->
+            <div id="trailTest" class="test-interface">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="trailProgress">0%</div>
+                </div>
+                
+                <h2 data-translate="trail-test-header">Trail Making Test</h2>
+                
+                <div id="trailPhase1" class="test-phase">
+                    <p data-translate="trail-instructions-intro" style="text-align: center;">Connect circles in order. Work quickly!</p>
+                    
+                    <div class="trail-options">
+                        <div class="trail-option">
+                            <h3 data-translate="trail-part-a-title">Part A - Numbers</h3>
+                            <p>1 → 2 → 3 → 4...</p>
+                            <button class="button button-primary" onclick="startTrailTest('A')">
+                                <span data-translate="start-part-a">Start A</span>
+                            </button>
+                        </div>
+                        
+                        <div class="trail-option trail-option-b">
+                            <h3 data-translate="trail-part-b-title">Part B - Mixed</h3>
+                            <p>1 → A → 2 → B...</p>
+                            <button class="button button-warning" onclick="startTrailTest('B')" style="background: #ff9800; color: white;">
+                                <span data-translate="start-part-b">Start B</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="trailPhase2" class="test-phase" style="display: none;">
+                    <h3 id="trailPartTitle" style="text-align: center; font-size: 1.1em; margin-bottom: 10px;">Part A</h3>
+                    
+                    <div class="trail-stats">
+                        <div class="stat-box">
+                            <strong data-translate="time">Time:</strong> <span id="trailTimer">0:00</span>
+                        </div>
+                        <div class="stat-box">
+                            <strong data-translate="errors">Errors:</strong> <span id="trailErrors">0</span>
+                        </div>
+                    </div>
+                    
+                    <canvas id="trailCanvas" width="350" height="400"></canvas>
+                    
+                    <div class="button-group">
+                        <button class="button button-secondary" onclick="resetTrailTest()">
+                            <span data-translate="reset">Reset</span>
+                        </button>
+                        <button class="button button-primary" id="submitTrailBtn" onclick="submitTrailTest()" disabled>
+                            <span data-translate="submit-test">Submit</span>
+                        </button>
+                    </div>
+                    
+                    <div id="trailFeedback" style="display: none;"></div>
+                </div>
+            </div>
+
+            <!-- Fluency Test -->
+            <div id="fluencyTest" class="test-interface">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="fluencyProgress">0%</div>
+                </div>
+                
+                <h2 data-translate="fluency-test-header">Fluency Test</h2>
+                
+                <div id="fluencyPhase1" class="test-phase">
+                    <p data-translate="fluency-instructions" style="text-align: center;">Name as many animals as you can in 60 seconds.</p>
+                    
+                    <div class="input-group">
+                        <label for="fluencyInput" data-translate="animals-label">Animals:</label>
+                        <input type="text" id="fluencyInput" placeholder="Type animal names...">
+                    </div>
+                    
+                    <div class="trail-stats" style="margin: 15px 0;">
+                        <div class="stat-box">
+                            <strong data-translate="time-remaining">Time:</strong> <span id="fluencyTimer">60</span>s
+                        </div>
+                        <div class="stat-box">
+                            <strong data-translate="count">Count:</strong> <span id="animalCount">0</span>
+                        </div>
+                    </div>
+                    
+                    <button class="button button-primary" onclick="startFluencyTest()">
+                        <span data-translate="start-timer">Start</span>
+                    </button>
+                    
+                    <div id="animalList"></div>
+                </div>
+            </div>
+
+            <!-- Orientation Test -->
+            <div id="orientationTest" class="test-interface">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="orientationProgress">0%</div>
+                </div>
+
+                <h2 data-translate="orientation-test-header">Orientation Test</h2>
+
+                <div id="orientationPhase1" class="test-phase">
+                    <p data-translate="orientation-instructions" style="text-align: center;">Answer these questions about today's date and your location.</p>
+
+                    <div class="input-group">
+                        <label data-translate="orientation-date">What is today's date? (number)</label>
+                        <input type="number" id="orientationDate" min="1" max="31" placeholder="1-31">
+                    </div>
+
+                    <div class="input-group">
+                        <label data-translate="orientation-month">What month is it? (number)</label>
+                        <input type="number" id="orientationMonth" min="1" max="12" placeholder="1-12">
+                    </div>
+
+                    <div class="input-group">
+                        <label data-translate="orientation-year">What year is it?</label>
+                        <input type="number" id="orientationYear" min="2020" max="2030" placeholder="2024">
+                    </div>
+
+                    <div class="input-group">
+                        <label data-translate="orientation-day">What day of the week is it?</label>
+                        <input type="text" id="orientationDay" placeholder="Monday, Tuesday...">
+                    </div>
+
+                    <div class="input-group">
+                        <label data-translate="orientation-city">What city are you in?</label>
+                        <input type="text" id="orientationCity" placeholder="City name">
+                    </div>
+
+                    <div class="input-group">
+                        <label data-translate="orientation-country">What country are you in?</label>
+                        <input type="text" id="orientationCountry" placeholder="Country name">
+                    </div>
+
+                    <button class="button button-primary" onclick="submitOrientationTest()">
+                        <span data-translate="submit">Submit</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Naming Test -->
+            <div id="namingTest" class="test-interface">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="namingProgress">0%</div>
+                </div>
+
+                <h2 data-translate="naming-test-header">Naming Test</h2>
+
+                <div id="namingPhase1" class="test-phase">
+                    <p data-translate="naming-instructions" style="text-align: center;">Name the animal described below.</p>
+
+                    <div class="naming-item" style="background: #f0f4f8; padding: 20px; border-radius: 8px; margin: 15px 0;">
+                        <p style="font-size: 1.1em;" data-translate="naming-animal1-desc">Large cat with a mane, known as the king of the jungle</p>
+                        <input type="text" id="namingAnimal1" placeholder="Animal name" style="margin-top: 10px;">
+                    </div>
+
+                    <div class="naming-item" style="background: #f0f4f8; padding: 20px; border-radius: 8px; margin: 15px 0;">
+                        <p style="font-size: 1.1em;" data-translate="naming-animal2-desc">Large gray animal with a horn on its nose</p>
+                        <input type="text" id="namingAnimal2" placeholder="Animal name" style="margin-top: 10px;">
+                    </div>
+
+                    <div class="naming-item" style="background: #f0f4f8; padding: 20px; border-radius: 8px; margin: 15px 0;">
+                        <p style="font-size: 1.1em;" data-translate="naming-animal3-desc">Desert animal with one or two humps on its back</p>
+                        <input type="text" id="namingAnimal3" placeholder="Animal name" style="margin-top: 10px;">
+                    </div>
+
+                    <button class="button button-primary" onclick="submitNamingTest()">
+                        <span data-translate="submit">Submit</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Digit Span Test -->
+            <div id="digitSpanTest" class="test-interface">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="digitSpanProgress">0%</div>
+                </div>
+
+                <h2 data-translate="digit-span-test-header">Digit Span Test</h2>
+
+                <div id="digitSpanPhase1" class="test-phase">
+                    <p data-translate="digit-span-instructions" style="text-align: center;">Listen to the numbers and type them back.</p>
+                    <button class="button button-primary" onclick="startDigitSpanTest()">
+                        <span data-translate="start-test">Start</span>
+                    </button>
+                </div>
+
+                <div id="digitSpanPhase2" class="test-phase" style="display: none;">
+                    <div id="digitDisplay" class="word-item" style="font-size: 2em;"></div>
+                </div>
+
+                <div id="digitSpanPhase3" class="test-phase" style="display: none;">
+                    <p id="digitSpanPrompt" style="text-align: center; font-weight: bold;"></p>
+                    <div class="input-group">
+                        <input type="text" id="digitSpanInput" placeholder="Type the numbers">
+                    </div>
+                    <button class="button button-primary" onclick="submitDigitSpan()">
+                        <span data-translate="submit">Submit</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Serial 7 Test -->
+            <div id="serial7Test" class="test-interface">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="serial7Progress">0%</div>
+                </div>
+
+                <h2 data-translate="serial7-test-header">Serial 7 Subtraction</h2>
+
+                <div id="serial7Phase1" class="test-phase">
+                    <p data-translate="serial7-instructions" style="text-align: center;">Starting from 100, subtract 7 five times.</p>
+
+                    <div style="text-align: center; margin: 20px 0;">
+                        <span style="font-size: 2em; font-weight: bold;">100</span>
+                        <span style="font-size: 1.5em;"> - 7 = </span>
+                    </div>
+
+                    <div class="input-group">
+                        <label>First answer (100 - 7):</label>
+                        <input type="number" id="serial7_1" placeholder="?">
+                    </div>
+                    <div class="input-group">
+                        <label>Second answer:</label>
+                        <input type="number" id="serial7_2" placeholder="?">
+                    </div>
+                    <div class="input-group">
+                        <label>Third answer:</label>
+                        <input type="number" id="serial7_3" placeholder="?">
+                    </div>
+                    <div class="input-group">
+                        <label>Fourth answer:</label>
+                        <input type="number" id="serial7_4" placeholder="?">
+                    </div>
+                    <div class="input-group">
+                        <label>Fifth answer:</label>
+                        <input type="number" id="serial7_5" placeholder="?">
+                    </div>
+
+                    <button class="button button-primary" onclick="submitSerial7Test()">
+                        <span data-translate="submit">Submit</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Vigilance Test -->
+            <div id="vigilanceTest" class="test-interface">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="vigilanceProgress">0%</div>
+                </div>
+
+                <h2 data-translate="vigilance-test-header">Attention Test</h2>
+
+                <div id="vigilancePhase1" class="test-phase">
+                    <p data-translate="vigilance-instructions" style="text-align: center;">Tap the button every time you see the letter "A".</p>
+                    <button class="button button-primary" onclick="startVigilanceTest()">
+                        <span data-translate="start-test">Start</span>
+                    </button>
+                </div>
+
+                <div id="vigilancePhase2" class="test-phase" style="display: none;">
+                    <div id="vigilanceLetter" class="word-item" style="font-size: 3em; height: 100px; display: flex; align-items: center; justify-content: center;"></div>
+                    <button class="button button-success" id="vigilanceTapBtn" onclick="vigilanceTap()" style="margin-top: 20px; font-size: 1.5em; padding: 20px 40px;">
+                        TAP
+                    </button>
+                    <div style="margin-top: 15px; text-align: center;">
+                        <span data-translate="taps">Taps:</span> <span id="vigilanceTapCount">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Abstraction Test -->
+            <div id="abstractionTest" class="test-interface">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="abstractionProgress">0%</div>
+                </div>
+
+                <h2 data-translate="abstraction-test-header">Abstraction Test</h2>
+
+                <div id="abstractionPhase1" class="test-phase">
+                    <p data-translate="abstraction-instructions" style="text-align: center;">What do these two items have in common?</p>
+
+                    <div class="naming-item" style="background: #e3f2fd; padding: 20px; border-radius: 8px; margin: 15px 0;">
+                        <p style="font-size: 1.3em; font-weight: bold; text-align: center;" data-translate="abstraction-pair1">Banana and Orange</p>
+                        <input type="text" id="abstractionPair1" placeholder="What are they both?" style="margin-top: 10px;">
+                    </div>
+
+                    <div class="naming-item" style="background: #fff3e0; padding: 20px; border-radius: 8px; margin: 15px 0;">
+                        <p style="font-size: 1.3em; font-weight: bold; text-align: center;" data-translate="abstraction-pair2">Train and Bicycle</p>
+                        <input type="text" id="abstractionPair2" placeholder="What are they both?" style="margin-top: 10px;">
+                    </div>
+
+                    <button class="button button-primary" onclick="submitAbstractionTest()">
+                        <span data-translate="submit">Submit</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Repetition Test -->
+            <div id="repetitionTest" class="test-interface">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="repetitionProgress">0%</div>
+                </div>
+
+                <h2 data-translate="repetition-test-header">Sentence Repetition</h2>
+
+                <div id="repetitionPhase1" class="test-phase">
+                    <p data-translate="repetition-instructions" style="text-align: center;">Repeat each sentence exactly as shown.</p>
+
+                    <div class="naming-item" style="background: #f0f4f8; padding: 20px; border-radius: 8px; margin: 15px 0;">
+                        <p style="font-size: 1.1em; font-style: italic;" data-translate="repetition-sentence1">"I only know that John is the one to help today."</p>
+                        <div class="voice-input-container" style="margin-top: 10px;">
+                            <button class="button button-secondary" onclick="toggleRecording('repetition1')" id="recordBtn1" style="width: auto;">
+                                🎤 <span data-translate="record">Record</span>
+                            </button>
+                            <input type="text" id="repetitionSentence1" placeholder="Type or speak the sentence" style="flex: 1;">
+                        </div>
+                    </div>
+
+                    <div class="naming-item" style="background: #f0f4f8; padding: 20px; border-radius: 8px; margin: 15px 0;">
+                        <p style="font-size: 1.1em; font-style: italic;" data-translate="repetition-sentence2">"The cat always hid under the couch when dogs were in the room."</p>
+                        <div class="voice-input-container" style="margin-top: 10px;">
+                            <button class="button button-secondary" onclick="toggleRecording('repetition2')" id="recordBtn2" style="width: auto;">
+                                🎤 <span data-translate="record">Record</span>
+                            </button>
+                            <input type="text" id="repetitionSentence2" placeholder="Type or speak the sentence" style="flex: 1;">
+                        </div>
+                    </div>
+
+                    <button class="button button-primary" onclick="submitRepetitionTest()">
+                        <span data-translate="submit">Submit</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Letter Fluency Test -->
+            <div id="letterFluencyTest" class="test-interface">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="letterFluencyProgress">0%</div>
+                </div>
+
+                <h2 data-translate="letter-fluency-test-header">Letter Fluency Test</h2>
+
+                <div id="letterFluencyPhase1" class="test-phase">
+                    <p data-translate="letter-fluency-instructions" style="text-align: center;">Name as many words as you can that start with the letter "F" in 60 seconds.</p>
+                    <p style="text-align: center; color: #666; font-size: 0.9em;" data-translate="letter-fluency-note">(No proper nouns or names)</p>
+
+                    <div class="input-group">
+                        <label for="letterFluencyInput" data-translate="words-label">Words:</label>
+                        <input type="text" id="letterFluencyInput" placeholder="Type words starting with F...">
+                    </div>
+
+                    <div class="trail-stats" style="margin: 15px 0;">
+                        <div class="stat-box">
+                            <strong data-translate="time-remaining">Time:</strong> <span id="letterFluencyTimer">60</span>s
+                        </div>
+                        <div class="stat-box">
+                            <strong data-translate="count">Count:</strong> <span id="letterWordCount">0</span>
+                        </div>
+                    </div>
+
+                    <button class="button button-primary" onclick="startLetterFluencyTest()">
+                        <span data-translate="start-timer">Start</span>
+                    </button>
+
+                    <div id="letterWordList" style="margin-top: 15px;"></div>
+                </div>
+            </div>
+
+            <!-- Results -->
+            <div id="resultsSection" class="results-section">
+                <h2 data-translate="results-header">Results</h2>
+                
+                <div id="resultContent"></div>
+                
+                <div class="button-group">
+                    <button class="button button-primary" onclick="returnHome()">
+                        <span data-translate="take-another">New Test</span>
+                    </button>
+                    <button class="button button-secondary" onclick="downloadResults()">
+                        <span data-translate="download">Download</span>
+                    </button>
+                    <button class="button button-secondary" onclick="fetchAndShowDatabaseResults()">
+                        <span data-translate="view-db-results">History</span>
+                    </button>
+                </div>
+                
+                <div id="databaseResults" style="margin-top: 20px; display: none;"></div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // ========== CONFIGURATION ==========
+        const API_URL = window.location.hostname === 'localhost' 
+            ? 'http://localhost:3000/api/supabase-api' 
+            : '/api/supabase-api';
+        
+        let sessionId = null;
+        let currentLang = 'en';
+        let currentTest = null;
+        let testResults = {};
+        let fluencyTimer = null;
+        let fluencyAnimals = [];
+        
+        // Translations (keeping only essential text for mobile)
+        const translations = {
+            en: {
+                'title': 'Cognitive Health Screening',
+                'intro': 'Quick tests to check your cognitive health. Takes 10-15 minutes.',
+                'disclaimer-title': 'Important:',
+                'disclaimer-text': 'Screening tool only. Consult a healthcare provider.',
+                'select-test': 'Select a Test:',
+                'memory-test-title': 'Memory Test',
+                'memory-test-desc': 'Remember common words',
+                'memory-test-duration': '5 minutes',
+                'trail-test-title': 'Trail Making Test',
+                'trail-test-desc': 'Connect circles in order',
+                'trail-test-duration': '3-5 minutes',
+                'fluency-test-title': 'Fluency Test',
+                'fluency-test-desc': 'Name animals quickly',
+                'fluency-test-duration': '2 minutes',
+                'memory-test-header': 'Memory Test',
+                'memory-instructions': 'Watch 10 words. Remember as many as you can.',
+                'start-test': 'Start',
+                'memory-recall': 'Type the words you remember:',
+                'submit': 'Submit',
+                'trail-test-header': 'Trail Making Test',
+                'trail-instructions-intro': 'Connect circles in order. Work quickly!',
+                'trail-part-a-title': 'Part A - Numbers',
+                'trail-part-b-title': 'Part B - Mixed',
+                'start-part-a': 'Start A',
+                'start-part-b': 'Start B',
+                'time': 'Time:',
+                'errors': 'Errors:',
+                'reset': 'Reset',
+                'submit-test': 'Submit',
+                'fluency-test-header': 'Fluency Test',
+                'fluency-instructions': 'Name as many animals as you can in 60 seconds.',
+                'animals-label': 'Animals:',
+                'time-remaining': 'Time:',
+                'count': 'Count:',
+                'start-timer': 'Start',
+                'results-header': 'Results',
+                'take-another': 'New Test',
+                'download': 'Download',
+                'view-db-results': 'History',
+                'high-contrast': 'Contrast',
+                'session-id': 'Session:',
+                'score': 'Score:',
+                'passed': 'Passed',
+                'needs-review': 'Review',
+                'pass-message': 'Results are normal. Keep up healthy habits!',
+                'concern-message': 'Some concerns found. Consider seeing a doctor.',
+                'words': ['apple', 'table', 'penny', 'garden', 'pencil', 'house', 'car', 'book', 'tree', 'shoe'],
+                // New MoCA test translations
+                'orientation-test-title': 'Orientation Test',
+                'orientation-test-desc': 'Answer date and place questions',
+                'orientation-test-duration': '1 minute',
+                'orientation-test-header': 'Orientation Test',
+                'orientation-instructions': 'Answer these questions about today\'s date and your location.',
+                'orientation-date': 'What is today\'s date? (number)',
+                'orientation-month': 'What month is it? (number)',
+                'orientation-year': 'What year is it?',
+                'orientation-day': 'What day of the week is it?',
+                'orientation-city': 'What city are you in?',
+                'orientation-country': 'What country are you in?',
+                'naming-test-title': 'Naming Test',
+                'naming-test-desc': 'Identify animals from descriptions',
+                'naming-test-duration': '1 minute',
+                'naming-test-header': 'Naming Test',
+                'naming-instructions': 'Name the animal described below.',
+                'naming-animal1-desc': 'Large cat with a mane, known as the king of the jungle',
+                'naming-animal2-desc': 'Large gray animal with a horn on its nose',
+                'naming-animal3-desc': 'Desert animal with one or two humps on its back',
+                'digit-span-test-title': 'Digit Span Test',
+                'digit-span-test-desc': 'Repeat number sequences',
+                'digit-span-test-duration': '2 minutes',
+                'digit-span-test-header': 'Digit Span Test',
+                'digit-span-instructions': 'Watch the numbers and type them back.',
+                'digit-forward-prompt': 'Type the numbers in the same order:',
+                'digit-backward-prompt': 'Type the numbers in REVERSE order:',
+                'serial7-test-title': 'Serial 7 Test',
+                'serial7-test-desc': 'Subtract 7 from 100',
+                'serial7-test-duration': '1 minute',
+                'serial7-test-header': 'Serial 7 Subtraction',
+                'serial7-instructions': 'Starting from 100, subtract 7 five times.',
+                'vigilance-test-title': 'Attention Test',
+                'vigilance-test-desc': 'Tap when you see letter A',
+                'vigilance-test-duration': '1 minute',
+                'vigilance-test-header': 'Attention Test',
+                'vigilance-instructions': 'Tap the button every time you see the letter "A".',
+                'taps': 'Taps:',
+                'abstraction-test-title': 'Abstraction Test',
+                'abstraction-test-desc': 'Find similarities between items',
+                'abstraction-test-duration': '1 minute',
+                'abstraction-test-header': 'Abstraction Test',
+                'abstraction-instructions': 'What do these two items have in common?',
+                'abstraction-pair1': 'Banana and Orange',
+                'abstraction-pair2': 'Train and Bicycle',
+                'repetition-test-title': 'Repetition Test',
+                'repetition-test-desc': 'Repeat sentences exactly',
+                'repetition-test-duration': '2 minutes',
+                'repetition-test-header': 'Sentence Repetition',
+                'repetition-instructions': 'Repeat each sentence exactly as shown.',
+                'repetition-sentence1': '"I only know that John is the one to help today."',
+                'repetition-sentence2': '"The cat always hid under the couch when dogs were in the room."',
+                'record': 'Record',
+                'stop': 'Stop',
+                'letter-fluency-test-title': 'Letter Fluency Test',
+                'letter-fluency-test-desc': 'Name words starting with F',
+                'letter-fluency-test-duration': '1 minute',
+                'letter-fluency-test-header': 'Letter Fluency Test',
+                'letter-fluency-instructions': 'Name as many words as you can that start with the letter "F" in 60 seconds.',
+                'letter-fluency-note': '(No proper nouns or names)',
+                'words-label': 'Words:'
+            },
+            es: {
+                'title': 'Evaluación Cognitiva',
+                'intro': 'Pruebas rápidas para verificar su salud cognitiva. 10-15 minutos.',
+                'disclaimer-title': 'Importante:',
+                'disclaimer-text': 'Solo evaluación. Consulte a un médico.',
+                'select-test': 'Seleccione:',
+                'memory-test-title': 'Memoria',
+                'memory-test-desc': 'Recordar palabras',
+                'memory-test-duration': '5 minutos',
+                'trail-test-title': 'Senderos',
+                'trail-test-desc': 'Conectar círculos',
+                'trail-test-duration': '3-5 minutos',
+                'fluency-test-title': 'Fluidez',
+                'fluency-test-desc': 'Nombrar animales',
+                'fluency-test-duration': '2 minutos',
+                'memory-test-header': 'Memoria',
+                'memory-instructions': 'Mire 10 palabras. Recuerde las que pueda.',
+                'start-test': 'Iniciar',
+                'memory-recall': 'Escriba las palabras que recuerda:',
+                'submit': 'Enviar',
+                'trail-test-header': 'Senderos',
+                'trail-instructions-intro': 'Conecte círculos en orden. ¡Rápido!',
+                'trail-part-a-title': 'Parte A - Números',
+                'trail-part-b-title': 'Parte B - Mixto',
+                'start-part-a': 'Iniciar A',
+                'start-part-b': 'Iniciar B',
+                'time': 'Tiempo:',
+                'errors': 'Errores:',
+                'reset': 'Reiniciar',
+                'submit-test': 'Enviar',
+                'fluency-test-header': 'Fluidez',
+                'fluency-instructions': 'Nombre animales en 60 segundos.',
+                'animals-label': 'Animales:',
+                'time-remaining': 'Tiempo:',
+                'count': 'Total:',
+                'start-timer': 'Iniciar',
+                'results-header': 'Resultados',
+                'take-another': 'Nueva',
+                'download': 'Descargar',
+                'view-db-results': 'Historial',
+                'high-contrast': 'Contraste',
+                'session-id': 'Sesión:',
+                'score': 'Puntos:',
+                'passed': 'Aprobado',
+                'needs-review': 'Revisar',
+                'pass-message': 'Resultados normales. ¡Mantenga hábitos saludables!',
+                'concern-message': 'Algunas preocupaciones. Considere ver a un médico.',
+                'words': ['manzana', 'mesa', 'moneda', 'jardín', 'lápiz', 'casa', 'carro', 'libro', 'árbol', 'zapato'],
+                // New MoCA test translations
+                'orientation-test-title': 'Orientación',
+                'orientation-test-desc': 'Preguntas de fecha y lugar',
+                'orientation-test-duration': '1 minuto',
+                'orientation-test-header': 'Prueba de Orientación',
+                'orientation-instructions': 'Responda preguntas sobre la fecha de hoy y su ubicación.',
+                'orientation-date': '¿Cuál es la fecha de hoy? (número)',
+                'orientation-month': '¿En qué mes estamos? (número)',
+                'orientation-year': '¿En qué año estamos?',
+                'orientation-day': '¿Qué día de la semana es?',
+                'orientation-city': '¿En qué ciudad está?',
+                'orientation-country': '¿En qué país está?',
+                'naming-test-title': 'Nombrar',
+                'naming-test-desc': 'Identificar animales',
+                'naming-test-duration': '1 minuto',
+                'naming-test-header': 'Prueba de Nombrar',
+                'naming-instructions': 'Nombre el animal descrito.',
+                'naming-animal1-desc': 'Felino grande con melena, conocido como el rey de la selva',
+                'naming-animal2-desc': 'Animal grande y gris con un cuerno en la nariz',
+                'naming-animal3-desc': 'Animal del desierto con una o dos jorobas',
+                'digit-span-test-title': 'Dígitos',
+                'digit-span-test-desc': 'Repetir secuencias numéricas',
+                'digit-span-test-duration': '2 minutos',
+                'digit-span-test-header': 'Prueba de Dígitos',
+                'digit-span-instructions': 'Observe los números y repítalos.',
+                'digit-forward-prompt': 'Escriba los números en el mismo orden:',
+                'digit-backward-prompt': 'Escriba los números en orden INVERSO:',
+                'serial7-test-title': 'Serie de 7',
+                'serial7-test-desc': 'Restar 7 de 100',
+                'serial7-test-duration': '1 minuto',
+                'serial7-test-header': 'Resta Serial de 7',
+                'serial7-instructions': 'Comenzando en 100, reste 7 cinco veces.',
+                'vigilance-test-title': 'Atención',
+                'vigilance-test-desc': 'Toque al ver la letra A',
+                'vigilance-test-duration': '1 minuto',
+                'vigilance-test-header': 'Prueba de Atención',
+                'vigilance-instructions': 'Toque el botón cada vez que vea la letra "A".',
+                'taps': 'Toques:',
+                'abstraction-test-title': 'Abstracción',
+                'abstraction-test-desc': 'Encontrar similitudes',
+                'abstraction-test-duration': '1 minuto',
+                'abstraction-test-header': 'Prueba de Abstracción',
+                'abstraction-instructions': '¿Qué tienen en común estos dos elementos?',
+                'abstraction-pair1': 'Plátano y Naranja',
+                'abstraction-pair2': 'Tren y Bicicleta',
+                'repetition-test-title': 'Repetición',
+                'repetition-test-desc': 'Repetir oraciones exactamente',
+                'repetition-test-duration': '2 minutos',
+                'repetition-test-header': 'Repetición de Oraciones',
+                'repetition-instructions': 'Repita cada oración exactamente como se muestra.',
+                'repetition-sentence1': '"Solo sé que Juan es el único que puede ayudar hoy."',
+                'repetition-sentence2': '"El gato siempre se escondía debajo del sofá cuando los perros estaban en la habitación."',
+                'record': 'Grabar',
+                'stop': 'Parar',
+                'letter-fluency-test-title': 'Fluidez de Letras',
+                'letter-fluency-test-desc': 'Nombrar palabras con F',
+                'letter-fluency-test-duration': '1 minuto',
+                'letter-fluency-test-header': 'Prueba de Fluidez de Letras',
+                'letter-fluency-instructions': 'Nombre tantas palabras como pueda que empiecen con "F" en 60 segundos.',
+                'letter-fluency-note': '(Sin nombres propios)',
+                'words-label': 'Palabras:'
+            },
+            zh: {
+                'title': '认知健康筛查',
+                'intro': '快速测试检查您的认知健康。需要10-15分钟。',
+                'disclaimer-title': '重要：',
+                'disclaimer-text': '仅筛查工具。请咨询医生。',
+                'select-test': '选择测试：',
+                'memory-test-title': '记忆测试',
+                'memory-test-desc': '记住常用词',
+                'memory-test-duration': '5分钟',
+                'trail-test-title': '连线测试',
+                'trail-test-desc': '按顺序连接圆圈',
+                'trail-test-duration': '3-5分钟',
+                'fluency-test-title': '流畅性测试',
+                'fluency-test-desc': '快速命名动物',
+                'fluency-test-duration': '2分钟',
+                'memory-test-header': '记忆测试',
+                'memory-instructions': '观看10个词。尽量记住。',
+                'start-test': '开始',
+                'memory-recall': '输入您记住的词：',
+                'submit': '提交',
+                'trail-test-header': '连线测试',
+                'trail-instructions-intro': '按顺序连接圆圈。快速工作！',
+                'trail-part-a-title': 'A部分 - 数字',
+                'trail-part-b-title': 'B部分 - 混合',
+                'start-part-a': '开始A',
+                'start-part-b': '开始B',
+                'time': '时间：',
+                'errors': '错误：',
+                'reset': '重置',
+                'submit-test': '提交',
+                'fluency-test-header': '流畅性测试',
+                'fluency-instructions': '在60秒内命名动物。',
+                'animals-label': '动物：',
+                'time-remaining': '时间：',
+                'count': '数量：',
+                'start-timer': '开始',
+                'results-header': '结果',
+                'take-another': '新测试',
+                'download': '下载',
+                'view-db-results': '历史',
+                'high-contrast': '对比度',
+                'session-id': '会话：',
+                'score': '分数：',
+                'passed': '通过',
+                'needs-review': '复查',
+                'pass-message': '结果正常。保持健康习惯！',
+                'concern-message': '发现一些问题。考虑看医生。',
+                'words': ['苹果', '桌子', '硬币', '花园', '铅笔', '房子', '汽车', '书', '树', '鞋子'],
+                // New MoCA test translations
+                'orientation-test-title': '定向测试',
+                'orientation-test-desc': '回答日期和地点问题',
+                'orientation-test-duration': '1分钟',
+                'orientation-test-header': '定向测试',
+                'orientation-instructions': '回答关于今天日期和您所在位置的问题。',
+                'orientation-date': '今天是几号？（数字）',
+                'orientation-month': '现在是几月？（数字）',
+                'orientation-year': '今年是哪一年？',
+                'orientation-day': '今天是星期几？',
+                'orientation-city': '您在哪个城市？',
+                'orientation-country': '您在哪个国家？',
+                'naming-test-title': '命名测试',
+                'naming-test-desc': '根据描述识别动物',
+                'naming-test-duration': '1分钟',
+                'naming-test-header': '命名测试',
+                'naming-instructions': '说出下面描述的动物名称。',
+                'naming-animal1-desc': '有鬃毛的大型猫科动物，被称为丛林之王',
+                'naming-animal2-desc': '鼻子上有角的大型灰色动物',
+                'naming-animal3-desc': '背上有一个或两个驼峰的沙漠动物',
+                'digit-span-test-title': '数字广度测试',
+                'digit-span-test-desc': '重复数字序列',
+                'digit-span-test-duration': '2分钟',
+                'digit-span-test-header': '数字广度测试',
+                'digit-span-instructions': '观看数字并将其输入。',
+                'digit-forward-prompt': '按相同顺序输入数字：',
+                'digit-backward-prompt': '按相反顺序输入数字：',
+                'serial7-test-title': '连续减7测试',
+                'serial7-test-desc': '从100减7',
+                'serial7-test-duration': '1分钟',
+                'serial7-test-header': '连续减7',
+                'serial7-instructions': '从100开始，连续减7五次。',
+                'vigilance-test-title': '注意力测试',
+                'vigilance-test-desc': '看到字母A时点击',
+                'vigilance-test-duration': '1分钟',
+                'vigilance-test-header': '注意力测试',
+                'vigilance-instructions': '每次看到字母"A"时点击按钮。',
+                'taps': '点击次数：',
+                'abstraction-test-title': '抽象思维测试',
+                'abstraction-test-desc': '找出事物之间的相似之处',
+                'abstraction-test-duration': '1分钟',
+                'abstraction-test-header': '抽象思维测试',
+                'abstraction-instructions': '这两个事物有什么共同点？',
+                'abstraction-pair1': '香蕉和橙子',
+                'abstraction-pair2': '火车和自行车',
+                'repetition-test-title': '复述测试',
+                'repetition-test-desc': '准确重复句子',
+                'repetition-test-duration': '2分钟',
+                'repetition-test-header': '句子复述',
+                'repetition-instructions': '准确重复显示的每个句子。',
+                'repetition-sentence1': '"我只知道约翰是今天唯一能帮忙的人。"',
+                'repetition-sentence2': '"当狗在房间里时，猫总是躲在沙发下面。"',
+                'record': '录音',
+                'stop': '停止',
+                'letter-fluency-test-title': '字母流畅性测试',
+                'letter-fluency-test-desc': '说出以F开头的词',
+                'letter-fluency-test-duration': '1分钟',
+                'letter-fluency-test-header': '字母流畅性测试',
+                'letter-fluency-instructions': '在60秒内说出尽可能多的以字母"F"开头的词。',
+                'letter-fluency-note': '（不包括专有名词或人名）',
+                'words-label': '词语：'
+            }
+        };
+        
+        // ========== INITIALIZATION ==========
+        window.addEventListener('DOMContentLoaded', async () => {
+            // Check if we have a saved session
+            sessionId = localStorage.getItem('sessionId');
+            
+            if (!sessionId) {
+                await createSession();
+            } else {
+                document.getElementById('currentSessionId').textContent = sessionId.substring(0, 12) + '...';
+                document.getElementById('sessionInfo').style.display = 'block';
+            }
+            
+            // Setup mobile canvas
+            setupMobileCanvas();
+        });
+        
+        // Create new session
+        async function createSession() {
+            try {
+                const response = await fetch(`${API_URL}?action=create-session`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ language: currentLang })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    sessionId = data.sessionId;
+                    localStorage.setItem('sessionId', sessionId);
+                    document.getElementById('currentSessionId').textContent = sessionId.substring(0, 12) + '...';
+                    document.getElementById('sessionInfo').style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Failed to create session:', error);
+                // Generate local session ID as fallback
+                sessionId = 'local_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                localStorage.setItem('sessionId', sessionId);
+            }
+        }
+        
+        // Setup mobile-optimized canvas
+        function setupMobileCanvas() {
+            const canvas = document.getElementById('trailCanvas');
+            if (!canvas) return;
+            
+            // Adjust canvas size based on device
+            const isMobile = window.innerWidth < 768;
+            const isTablet = window.innerWidth >= 768 && window.innerWidth < 1024;
+            
+            if (isMobile) {
+                const maxWidth = Math.min(350, window.innerWidth - 40);
+                canvas.width = maxWidth;
+                canvas.height = maxWidth * 1.14; // 4:4.5 ratio
+            } else if (isTablet) {
+                canvas.width = 600;
+                canvas.height = 450;
+            } else {
+                canvas.width = 800;
+                canvas.height = 600;
+            }
+        }
+        
+        // Window resize handler
+        window.addEventListener('resize', setupMobileCanvas);
+        
+        // Language change
+        document.querySelectorAll('.lang-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentLang = btn.dataset.lang;
+                updateLanguage();
+            });
+        });
+        
+        function updateLanguage() {
+            document.querySelectorAll('[data-translate]').forEach(element => {
+                const key = element.dataset.translate;
+                if (translations[currentLang][key]) {
+                    element.textContent = translations[currentLang][key];
+                }
+            });
+        }
+        
+        // Accessibility functions
+        function changeTextSize(action) {
+            const root = document.documentElement;
+            const currentSize = parseInt(getComputedStyle(root).getPropertyValue('--text-size-base'));
+            
+            switch(action) {
+                case 'increase':
+                    if (currentSize < 24) {
+                        root.style.setProperty('--text-size-base', (currentSize + 2) + 'px');
+                    }
+                    break;
+                case 'decrease':
+                    if (currentSize > 12) {
+                        root.style.setProperty('--text-size-base', (currentSize - 2) + 'px');
+                    }
+                    break;
+                case 'reset':
+                    root.style.setProperty('--text-size-base', '16px');
+                    break;
+            }
+        }
+        
+        function toggleHighContrast() {
+            document.body.classList.toggle('high-contrast');
+        }
+        
+        // ========== TEST MANAGEMENT ==========
+        function startTest(testType) {
+            currentTest = testType;
+            document.getElementById('homeScreen').style.display = 'none';
+            document.getElementById('resultsSection').classList.remove('active');
+            
+            document.querySelectorAll('.test-interface').forEach(test => {
+                test.classList.remove('active');
+            });
+            
+            switch(testType) {
+                case 'memory':
+                    document.getElementById('memoryTest').classList.add('active');
+                    updateProgress('memoryProgress', 0);
+                    break;
+                case 'trail':
+                    document.getElementById('trailTest').classList.add('active');
+                    updateProgress('trailProgress', 0);
+                    document.getElementById('trailPhase1').style.display = 'block';
+                    document.getElementById('trailPhase2').style.display = 'none';
+                    break;
+                case 'fluency':
+                    document.getElementById('fluencyTest').classList.add('active');
+                    updateProgress('fluencyProgress', 0);
+                    break;
+            }
+        }
+        
+        function updateProgress(progressId, percent) {
+            const progressBar = document.getElementById(progressId);
+            progressBar.style.width = percent + '%';
+            progressBar.textContent = percent + '%';
+        }
+        
+        // ========== MEMORY TEST ==========
+        function showMemoryWords() {
+            const words = translations[currentLang].words;
+            const wordDisplay = document.getElementById('wordDisplay');
+            document.getElementById('memoryPhase1').style.display = 'none';
+            document.getElementById('memoryPhase2').style.display = 'block';
+            
+            let wordIndex = 0;
+            updateProgress('memoryProgress', 10);
+            
+            const showNextWord = () => {
+                if (wordIndex < words.length) {
+                    wordDisplay.innerHTML = `<div class="word-item">${words[wordIndex]}</div>`;
+                    wordIndex++;
+                    updateProgress('memoryProgress', 10 + (wordIndex * 8));
+                    setTimeout(showNextWord, 2000);
+                } else {
+                    document.getElementById('memoryPhase2').style.display = 'none';
+                    document.getElementById('memoryPhase3').style.display = 'block';
+                    updateProgress('memoryProgress', 90);
+                }
+            };
+            
+            showNextWord();
+        }
+        
+        async function submitMemoryTest() {
+            const input = document.getElementById('recallInput').value.toLowerCase();
+            const words = translations[currentLang].words;
+            const recalled = input.split(',').map(w => w.trim());
+            const correct = recalled.filter(w => words.map(w => w.toLowerCase()).includes(w)).length;
+            
+            testResults.memory = {
+                score: correct,
+                total: words.length,
+                passed: correct >= 4
+            };
+            
+            // Save to Supabase
+            await saveTestResult('memory', testResults.memory);
+            
+            updateProgress('memoryProgress', 100);
+            setTimeout(() => showResults(), 500);
+        }
+        
+        // ========== TRAIL MAKING TEST ==========
+        let trailTestData = {
+            part: null,
+            startTime: null,
+            connections: [],
+            errors: 0,
+            nodes: [],
+            currentNodeIndex: 0,
+            canvas: null,
+            ctx: null,
+            timer: null,
+            completed: false
+        };
+        
+        function startTrailTest(part) {
+            setupMobileCanvas(); // Ensure canvas is properly sized
+            
+            trailTestData = {
+                part: part,
+                startTime: Date.now(),
+                connections: [],
+                errors: 0,
+                nodes: [],
+                currentNodeIndex: 0,
+                completed: false
+            };
+            
+            document.getElementById('trailPhase1').style.display = 'none';
+            document.getElementById('trailPhase2').style.display = 'block';
+            document.getElementById('trailPartTitle').textContent = `Part ${part}`;
+            
+            if (part === 'A') {
+                generateNodesPartA();
+            } else {
+                generateNodesPartB();
+            }
+            
+            initTrailCanvas();
+            startTrailTimer();
+            updateProgress('trailProgress', 10);
+        }
+        
+        function generateNodesPartA() {
+            const canvas = document.getElementById('trailCanvas');
+            const width = canvas.width;
+            const height = canvas.height;
+            const padding = 40;
+            const radius = width < 400 ? 25 : 30;
+            
+            // Generate positions that work on mobile
+            const positions = [];
+            for (let i = 0; i < 8; i++) {
+                positions.push({
+                    x: padding + Math.random() * (width - 2 * padding),
+                    y: padding + Math.random() * (height - 2 * padding)
+                });
+            }
+            
+            trailTestData.nodes = positions.map((pos, i) => ({
+                label: String(i + 1),
+                x: pos.x,
+                y: pos.y,
+                radius: radius,
+                connected: false
+            }));
+        }
+        
+        function generateNodesPartB() {
+            const canvas = document.getElementById('trailCanvas');
+            const width = canvas.width;
+            const height = canvas.height;
+            const padding = 40;
+            const radius = width < 400 ? 25 : 30;
+            
+            const sequence = ['1', 'A', '2', 'B', '3', 'C', '4', 'D'];
+            const positions = [];
+            
+            for (let i = 0; i < sequence.length; i++) {
+                positions.push({
+                    x: padding + Math.random() * (width - 2 * padding),
+                    y: padding + Math.random() * (height - 2 * padding)
+                });
+            }
+            
+            trailTestData.nodes = positions.map((pos, i) => ({
+                label: sequence[i],
+                x: pos.x,
+                y: pos.y,
+                radius: radius,
+                connected: false
+            }));
+        }
+        
+        function initTrailCanvas() {
+            const canvas = document.getElementById('trailCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            trailTestData.canvas = canvas;
+            trailTestData.ctx = ctx;
+            
+            drawTrailNodes();
+            
+            // Add both mouse and touch events
+            canvas.addEventListener('click', handleTrailClick);
+            canvas.addEventListener('touchstart', handleTrailTouch, { passive: false });
+        }
+        
+        function handleTrailClick(e) {
+            const rect = trailTestData.canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            processTrailClick(x * (trailTestData.canvas.width / rect.width), 
+                             y * (trailTestData.canvas.height / rect.height));
+        }
+        
+        function handleTrailTouch(e) {
+            e.preventDefault();
+            const rect = trailTestData.canvas.getBoundingClientRect();
+            const touch = e.touches[0];
+            const x = touch.clientX - rect.left;
+            const y = touch.clientY - rect.top;
+            processTrailClick(x * (trailTestData.canvas.width / rect.width), 
+                             y * (trailTestData.canvas.height / rect.height));
+        }
+        
+        function processTrailClick(x, y) {
+            for (let node of trailTestData.nodes) {
+                const distance = Math.sqrt((x - node.x) ** 2 + (y - node.y) ** 2);
+                
+                if (distance <= node.radius && !node.connected) {
+                    const expectedNode = getExpectedNextNode();
+                    
+                    if (node.label === expectedNode) {
+                        node.connected = true;
+                        trailTestData.connections.push({
+                            label: node.label,
+                            x: node.x,
+                            y: node.y
+                        });
+                        trailTestData.currentNodeIndex++;
+                        
+                        if (trailTestData.currentNodeIndex === trailTestData.nodes.length) {
+                            completeTrailTest();
+                        }
+                        
+                        updateProgress('trailProgress', (trailTestData.currentNodeIndex / trailTestData.nodes.length) * 100);
+                    } else {
+                        trailTestData.errors++;
+                        document.getElementById('trailErrors').textContent = trailTestData.errors;
+                        showTrailFeedback('✗', 'error');
+                    }
+                    
+                    drawTrailNodes();
+                    break;
+                }
+            }
+        }
+        
+        function getExpectedNextNode() {
+            if (trailTestData.part === 'A') {
+                return String(trailTestData.currentNodeIndex + 1);
+            } else {
+                const sequence = ['1', 'A', '2', 'B', '3', 'C', '4', 'D'];
+                return sequence[trailTestData.currentNodeIndex];
+            }
+        }
+        
+        function drawTrailNodes() {
+            const ctx = trailTestData.ctx;
+            const canvas = trailTestData.canvas;
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw connections
+            ctx.strokeStyle = '#4CAF50';
+            ctx.lineWidth = 2;
+            for (let i = 0; i < trailTestData.connections.length - 1; i++) {
+                const conn1 = trailTestData.connections[i];
+                const conn2 = trailTestData.connections[i + 1];
+                
+                ctx.beginPath();
+                ctx.moveTo(conn1.x, conn1.y);
+                ctx.lineTo(conn2.x, conn2.y);
+                ctx.stroke();
+            }
+            
+            // Draw nodes
+            trailTestData.nodes.forEach(node => {
+                ctx.beginPath();
+                ctx.arc(node.x, node.y, node.radius, 0, 2 * Math.PI);
+                
+                if (node.connected) {
+                    ctx.fillStyle = '#4CAF50';
+                    ctx.fill();
+                    ctx.strokeStyle = '#2E7D32';
+                } else {
+                    ctx.fillStyle = 'white';
+                    ctx.fill();
+                    ctx.strokeStyle = '#333';
+                }
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                
+                ctx.fillStyle = node.connected ? 'white' : '#333';
+                ctx.font = `bold ${node.radius * 0.8}px Arial`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(node.label, node.x, node.y);
+            });
+        }
+        
+        function showTrailFeedback(message, type) {
+            const feedbackEl = document.getElementById('trailFeedback');
+            feedbackEl.style.display = 'block';
+            feedbackEl.style.background = type === 'success' ? '#d4edda' : '#f8d7da';
+            feedbackEl.style.color = type === 'success' ? '#155724' : '#721c24';
+            feedbackEl.innerHTML = message;
+            
+            setTimeout(() => {
+                feedbackEl.style.display = 'none';
+            }, 1500);
+        }
+        
+        function startTrailTimer() {
+            let seconds = 0;
+            
+            trailTestData.timer = setInterval(() => {
+                seconds++;
+                const minutes = Math.floor(seconds / 60);
+                const secs = seconds % 60;
+                document.getElementById('trailTimer').textContent = 
+                    `${minutes}:${secs.toString().padStart(2, '0')}`;
+            }, 1000);
+        }
+        
+        function completeTrailTest() {
+            trailTestData.completed = true;
+            clearInterval(trailTestData.timer);
+            document.getElementById('submitTrailBtn').disabled = false;
+            showTrailFeedback('✓', 'success');
+        }
+        
+        function resetTrailTest() {
+            clearInterval(trailTestData.timer);
+            startTrailTest(trailTestData.part);
+        }
+        
+        async function submitTrailTest() {
+            const timeInSeconds = (Date.now() - trailTestData.startTime) / 1000;
+            
+            testResults.trail = {
+                part: trailTestData.part,
+                time: timeInSeconds,
+                errors: trailTestData.errors,
+                completed: trailTestData.completed,
+                passed: trailTestData.completed && trailTestData.errors <= 3 && timeInSeconds < 90
+            };
+            
+            await saveTestResult('trail', testResults.trail);
+            
+            clearInterval(trailTestData.timer);
+            setTimeout(() => showResults(), 500);
+        }
+        
+        // ========== FLUENCY TEST ==========
+        function startFluencyTest() {
+            const input = document.getElementById('fluencyInput');
+            input.disabled = false;
+            input.focus();
+            fluencyAnimals = [];
+            let timeRemaining = 60;
+            
+            updateProgress('fluencyProgress', 0);
+            
+            input.addEventListener('input', (e) => {
+                const value = e.target.value;
+                if (value.includes(',') || value.includes('\n')) {
+                    const animals = value.split(/[,\n]/).map(a => a.trim()).filter(a => a.length > 0);
+                    animals.forEach(animal => {
+                        if (!fluencyAnimals.includes(animal.toLowerCase())) {
+                            fluencyAnimals.push(animal.toLowerCase());
+                        }
+                    });
+                    input.value = '';
+                    updateAnimalDisplay();
+                }
+            });
+            
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const animal = input.value.trim();
+                    if (animal && !fluencyAnimals.includes(animal.toLowerCase())) {
+                        fluencyAnimals.push(animal.toLowerCase());
+                        input.value = '';
+                        updateAnimalDisplay();
+                    }
+                }
+            });
+            
+            function updateAnimalDisplay() {
+                document.getElementById('animalCount').textContent = fluencyAnimals.length;
+                document.getElementById('animalList').innerHTML = fluencyAnimals.map(a => 
+                    `<span>${a}</span>`
+                ).join('');
+            }
+            
+            fluencyTimer = setInterval(() => {
+                timeRemaining--;
+                document.getElementById('fluencyTimer').textContent = timeRemaining;
+                updateProgress('fluencyProgress', ((60 - timeRemaining) / 60) * 100);
+                
+                if (timeRemaining <= 0) {
+                    clearInterval(fluencyTimer);
+                    input.disabled = true;
+                    submitFluencyTest();
+                }
+            }, 1000);
+        }
+        
+        async function submitFluencyTest() {
+            testResults.fluency = {
+                score: fluencyAnimals.length,
+                passed: fluencyAnimals.length >= 11
+            };
+            
+            await saveTestResult('fluency', testResults.fluency);
+            
+            updateProgress('fluencyProgress', 100);
+            setTimeout(() => showResults(), 500);
+        }
+        
+        // ========== SAVE TEST RESULTS ==========
+        async function saveTestResult(testType, result) {
+            try {
+                const response = await fetch(`${API_URL}?action=save-test`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        sessionId: sessionId,
+                        testType: testType,
+                        scores: result,
+                        testData: { language: currentLang },
+                        interpretation: { passed: result.passed },
+                        metadata: { 
+                            userAgent: navigator.userAgent,
+                            screenSize: `${window.innerWidth}x${window.innerHeight}`
+                        }
+                    })
+                });
+                
+                const data = await response.json();
+                console.log('Test saved:', data);
+            } catch (error) {
+                console.error('Failed to save test:', error);
+                // Store locally as backup
+                const localResults = JSON.parse(localStorage.getItem('testResults') || '[]');
+                localResults.push({
+                    sessionId, testType, result, date: new Date()
+                });
+                localStorage.setItem('testResults', JSON.stringify(localResults));
+            }
+        }
+        
+        // ========== SHOW RESULTS ==========
+        function showResults() {
+            document.querySelectorAll('.test-interface').forEach(test => {
+                test.classList.remove('active');
+            });
+            
+            const resultsSection = document.getElementById('resultsSection');
+            const resultContent = document.getElementById('resultContent');
+            
+            resultsSection.classList.add('active');
+            
+            let overallPass = true;
+            let html = '';
+            
+            Object.keys(testResults).forEach(testType => {
+                const result = testResults[testType];
+                const pass = result.passed;
+                overallPass = overallPass && pass;
+                
+                html += `
+                    <div class="result-card ${pass ? 'result-pass' : 'result-concern'}">
+                        <h3>${testType.toUpperCase()}</h3>
+                        <p>${translations[currentLang]['score']}: ${result.score || 0}</p>
+                        <p>${pass ? '✓ ' + translations[currentLang]['passed'] : '⚠ ' + translations[currentLang]['needs-review']}</p>
+                    </div>
+                `;
+            });
+            
+            html += `
+                <div class="result-card ${overallPass ? 'result-pass' : 'result-concern'}">
+                    <div class="result-icon">${overallPass ? '✓' : '⚠'}</div>
+                    <p class="result-message">
+                        ${overallPass ? translations[currentLang]['pass-message'] : translations[currentLang]['concern-message']}
+                    </p>
+                </div>
+            `;
+            
+            resultContent.innerHTML = html;
+        }
+        
+        function returnHome() {
+            document.getElementById('resultsSection').classList.remove('active');
+            document.querySelectorAll('.test-interface').forEach(test => {
+                test.classList.remove('active');
+            });
+            document.getElementById('homeScreen').style.display = 'block';
+            testResults = {};
+        }
+        
+        function downloadResults() {
+            const date = new Date().toLocaleDateString();
+            let text = `Cognitive Health Screening - ${date}\nSession: ${sessionId}\n\n`;
+            
+            Object.keys(testResults).forEach(testType => {
+                const result = testResults[testType];
+                text += `${testType}: ${result.passed ? 'PASSED' : 'NEEDS REVIEW'}\n`;
+            });
+            
+            const blob = new Blob([text], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `cognitive-screening-${date}.txt`;
+            a.click();
+        }
+        
+        async function fetchAndShowDatabaseResults() {
+            const resultsDiv = document.getElementById('databaseResults');
+            resultsDiv.innerHTML = '<div class="loader"></div>';
+            resultsDiv.style.display = 'block';
+
+            try {
+                const response = await fetch(`${API_URL}?action=get-results&sessionId=${sessionId}`);
+                const data = await response.json();
+
+                if (data.success && data.results.length > 0) {
+                    let html = '<h3>Test History</h3>';
+                    data.results.forEach(result => {
+                        const date = new Date(result.created_at).toLocaleDateString();
+                        html += `
+                            <div class="result-card" style="margin: 10px 0; padding: 10px;">
+                                <strong>${result.test_type}</strong> - ${date}<br>
+                                ${result.interpretation.passed ? '✓ Passed' : '⚠ Review'}
+                            </div>
+                        `;
+                    });
+                    html += '<button class="button button-secondary" onclick="this.parentElement.style.display=\'none\'">Close</button>';
+                    resultsDiv.innerHTML = html;
+                } else {
+                    resultsDiv.innerHTML = '<p>No history found</p>';
+                    setTimeout(() => { resultsDiv.style.display = 'none'; }, 2000);
+                }
+            } catch (error) {
+                console.error('Failed to fetch history:', error);
+                resultsDiv.innerHTML = '<p>Failed to load history</p>';
+            }
+        }
+
+        // ========== ORIENTATION TEST ==========
+        async function submitOrientationTest() {
+            const responses = {
+                date: document.getElementById('orientationDate').value,
+                month: document.getElementById('orientationMonth').value,
+                year: document.getElementById('orientationYear').value,
+                day: document.getElementById('orientationDay').value,
+                city: document.getElementById('orientationCity').value,
+                country: document.getElementById('orientationCountry').value
+            };
+
+            updateProgress('orientationProgress', 50);
+
+            try {
+                const response = await fetch(`${API_URL}?action=score-test`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        testType: 'orientation',
+                        responses: responses,
+                        language: currentLang
+                    })
+                });
+                const data = await response.json();
+
+                testResults.orientation = {
+                    score: data.result.score.points,
+                    maxScore: 6,
+                    passed: data.result.interpretation.passed,
+                    details: data.result.score.details
+                };
+            } catch (error) {
+                // Local scoring fallback
+                const now = new Date();
+                let points = 0;
+                if (parseInt(responses.date) === now.getDate()) points++;
+                if (parseInt(responses.month) === now.getMonth() + 1) points++;
+                if (parseInt(responses.year) === now.getFullYear()) points++;
+                if (responses.city) points++;
+                if (responses.country) points++;
+
+                testResults.orientation = {
+                    score: points,
+                    maxScore: 6,
+                    passed: points >= 4
+                };
+            }
+
+            await saveTestResult('orientation', testResults.orientation);
+            updateProgress('orientationProgress', 100);
+            setTimeout(() => showResults(), 500);
+        }
+
+        // ========== NAMING TEST ==========
+        async function submitNamingTest() {
+            const responses = {
+                animal1: document.getElementById('namingAnimal1').value,
+                animal2: document.getElementById('namingAnimal2').value,
+                animal3: document.getElementById('namingAnimal3').value
+            };
+
+            updateProgress('namingProgress', 50);
+
+            try {
+                const response = await fetch(`${API_URL}?action=score-test`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        testType: 'naming',
+                        responses: responses,
+                        language: currentLang
+                    })
+                });
+                const data = await response.json();
+
+                testResults.naming = {
+                    score: data.result.score.points,
+                    maxScore: 3,
+                    passed: data.result.interpretation.passed
+                };
+            } catch (error) {
+                // Local scoring fallback
+                const answers = {
+                    animal1: ['lion', 'lions'],
+                    animal2: ['rhinoceros', 'rhino', 'rhinos'],
+                    animal3: ['camel', 'camels']
+                };
+                let points = 0;
+                if (answers.animal1.includes(responses.animal1.toLowerCase().trim())) points++;
+                if (answers.animal2.includes(responses.animal2.toLowerCase().trim())) points++;
+                if (answers.animal3.includes(responses.animal3.toLowerCase().trim())) points++;
+
+                testResults.naming = {
+                    score: points,
+                    maxScore: 3,
+                    passed: points >= 2
+                };
+            }
+
+            await saveTestResult('naming', testResults.naming);
+            updateProgress('namingProgress', 100);
+            setTimeout(() => showResults(), 500);
+        }
+
+        // ========== DIGIT SPAN TEST ==========
+        let digitSpanData = {
+            phase: 'forward',
+            forwardDigits: '2-1-8-5-4',
+            backwardDigits: '7-4-2',
+            forwardResponse: '',
+            backwardResponse: ''
+        };
+
+        function startDigitSpanTest() {
+            document.getElementById('digitSpanPhase1').style.display = 'none';
+            document.getElementById('digitSpanPhase2').style.display = 'block';
+            digitSpanData.phase = 'forward';
+            showDigits(digitSpanData.forwardDigits.split('-'), 0);
+        }
+
+        function showDigits(digits, index) {
+            const display = document.getElementById('digitDisplay');
+            if (index < digits.length) {
+                display.textContent = digits[index];
+                updateProgress('digitSpanProgress', (index / digits.length) * 30);
+                setTimeout(() => showDigits(digits, index + 1), 1000);
+            } else {
+                display.textContent = '';
+                document.getElementById('digitSpanPhase2').style.display = 'none';
+                document.getElementById('digitSpanPhase3').style.display = 'block';
+
+                if (digitSpanData.phase === 'forward') {
+                    document.getElementById('digitSpanPrompt').textContent =
+                        translations[currentLang]['digit-forward-prompt'] || 'Type the numbers in the same order:';
+                } else {
+                    document.getElementById('digitSpanPrompt').textContent =
+                        translations[currentLang]['digit-backward-prompt'] || 'Type the numbers in REVERSE order:';
+                }
+                document.getElementById('digitSpanInput').value = '';
+                document.getElementById('digitSpanInput').focus();
+            }
+        }
+
+        function submitDigitSpan() {
+            const input = document.getElementById('digitSpanInput').value;
+
+            if (digitSpanData.phase === 'forward') {
+                digitSpanData.forwardResponse = input;
+                digitSpanData.phase = 'backward';
+                document.getElementById('digitSpanPhase3').style.display = 'none';
+                document.getElementById('digitSpanPhase2').style.display = 'block';
+                updateProgress('digitSpanProgress', 50);
+                showDigits(digitSpanData.backwardDigits.split('-'), 0);
+            } else {
+                digitSpanData.backwardResponse = input;
+                finishDigitSpanTest();
+            }
+        }
+
+        async function finishDigitSpanTest() {
+            updateProgress('digitSpanProgress', 80);
+
+            try {
+                const response = await fetch(`${API_URL}?action=score-test`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        testType: 'digit-span',
+                        responses: {
+                            forward: digitSpanData.forwardResponse,
+                            backward: digitSpanData.backwardResponse
+                        }
+                    })
+                });
+                const data = await response.json();
+
+                testResults.digitSpan = {
+                    score: data.result.score.points,
+                    maxScore: 2,
+                    passed: data.result.interpretation.passed
+                };
+            } catch (error) {
+                // Local scoring fallback
+                let points = 0;
+                if (digitSpanData.forwardResponse.replace(/\D/g, '') === '21854') points++;
+                if (digitSpanData.backwardResponse.replace(/\D/g, '') === '247') points++;
+
+                testResults.digitSpan = {
+                    score: points,
+                    maxScore: 2,
+                    passed: points >= 1
+                };
+            }
+
+            await saveTestResult('digit-span', testResults.digitSpan);
+            updateProgress('digitSpanProgress', 100);
+            setTimeout(() => showResults(), 500);
+        }
+
+        // ========== SERIAL 7 TEST ==========
+        async function submitSerial7Test() {
+            const answers = [
+                document.getElementById('serial7_1').value,
+                document.getElementById('serial7_2').value,
+                document.getElementById('serial7_3').value,
+                document.getElementById('serial7_4').value,
+                document.getElementById('serial7_5').value
+            ];
+
+            updateProgress('serial7Progress', 50);
+
+            try {
+                const response = await fetch(`${API_URL}?action=score-test`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        testType: 'serial7',
+                        responses: { answers: answers }
+                    })
+                });
+                const data = await response.json();
+
+                testResults.serial7 = {
+                    score: data.result.score.mocaPoints,
+                    maxScore: 3,
+                    passed: data.result.interpretation.passed
+                };
+            } catch (error) {
+                // Local scoring fallback
+                const correct = [93, 86, 79, 72, 65];
+                let correctCount = 0;
+                for (let i = 0; i < 5; i++) {
+                    if (parseInt(answers[i]) === correct[i]) correctCount++;
+                }
+                let points = correctCount >= 4 ? 3 : (correctCount >= 2 ? 2 : (correctCount >= 1 ? 1 : 0));
+
+                testResults.serial7 = {
+                    score: points,
+                    maxScore: 3,
+                    passed: points >= 2
+                };
+            }
+
+            await saveTestResult('serial7', testResults.serial7);
+            updateProgress('serial7Progress', 100);
+            setTimeout(() => showResults(), 500);
+        }
+
+        // ========== VIGILANCE TEST ==========
+        let vigilanceData = {
+            sequence: 'FBACMNAAJKLBAFAKDEAAAJAMOFAAB'.split(''),
+            currentIndex: 0,
+            taps: 0,
+            errors: 0,
+            currentLetter: '',
+            timer: null
+        };
+
+        function startVigilanceTest() {
+            document.getElementById('vigilancePhase1').style.display = 'none';
+            document.getElementById('vigilancePhase2').style.display = 'block';
+            vigilanceData = {
+                sequence: 'FBACMNAAJKLBAFAKDEAAAJAMOFAAB'.split(''),
+                currentIndex: 0,
+                taps: 0,
+                errors: 0,
+                currentLetter: '',
+                timer: null
+            };
+            document.getElementById('vigilanceTapCount').textContent = '0';
+            showNextLetter();
+        }
+
+        function showNextLetter() {
+            if (vigilanceData.currentIndex < vigilanceData.sequence.length) {
+                vigilanceData.currentLetter = vigilanceData.sequence[vigilanceData.currentIndex];
+                document.getElementById('vigilanceLetter').textContent = vigilanceData.currentLetter;
+                updateProgress('vigilanceProgress', (vigilanceData.currentIndex / vigilanceData.sequence.length) * 100);
+
+                vigilanceData.timer = setTimeout(() => {
+                    // If letter was A and user didn't tap, count as miss
+                    if (vigilanceData.currentLetter === 'A') {
+                        vigilanceData.errors++;
+                    }
+                    vigilanceData.currentIndex++;
+                    showNextLetter();
+                }, 1000);
+            } else {
+                finishVigilanceTest();
+            }
+        }
+
+        function vigilanceTap() {
+            vigilanceData.taps++;
+            document.getElementById('vigilanceTapCount').textContent = vigilanceData.taps;
+
+            if (vigilanceData.currentLetter === 'A') {
+                // Correct tap - clear the timeout so we don't count it as a miss
+                clearTimeout(vigilanceData.timer);
+                vigilanceData.currentIndex++;
+                showNextLetter();
+            } else {
+                // False positive
+                vigilanceData.errors++;
+            }
+        }
+
+        async function finishVigilanceTest() {
+            document.getElementById('vigilanceLetter').textContent = 'Done!';
+            document.getElementById('vigilanceTapBtn').disabled = true;
+
+            try {
+                const response = await fetch(`${API_URL}?action=score-test`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        testType: 'vigilance',
+                        responses: {
+                            taps: vigilanceData.taps,
+                            errors: vigilanceData.errors
+                        }
+                    })
+                });
+                const data = await response.json();
+
+                testResults.vigilance = {
+                    score: data.result.score.mocaPoints,
+                    taps: vigilanceData.taps,
+                    errors: vigilanceData.errors,
+                    passed: data.result.interpretation.passed
+                };
+            } catch (error) {
+                testResults.vigilance = {
+                    score: vigilanceData.errors < 2 ? 1 : 0,
+                    taps: vigilanceData.taps,
+                    errors: vigilanceData.errors,
+                    passed: vigilanceData.errors < 2
+                };
+            }
+
+            await saveTestResult('vigilance', testResults.vigilance);
+            updateProgress('vigilanceProgress', 100);
+            setTimeout(() => showResults(), 500);
+        }
+
+        // ========== ABSTRACTION TEST ==========
+        async function submitAbstractionTest() {
+            const responses = {
+                pair1: document.getElementById('abstractionPair1').value,
+                pair2: document.getElementById('abstractionPair2').value
+            };
+
+            updateProgress('abstractionProgress', 50);
+
+            try {
+                const response = await fetch(`${API_URL}?action=score-test`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        testType: 'abstraction',
+                        responses: responses,
+                        language: currentLang
+                    })
+                });
+                const data = await response.json();
+
+                testResults.abstraction = {
+                    score: data.result.score.points,
+                    maxScore: 2,
+                    passed: data.result.interpretation.passed
+                };
+            } catch (error) {
+                // Local scoring fallback
+                const acceptable1 = ['fruit', 'fruits', 'food'];
+                const acceptable2 = ['transport', 'transportation', 'vehicle', 'vehicles'];
+                let points = 0;
+                if (acceptable1.includes(responses.pair1.toLowerCase().trim())) points++;
+                if (acceptable2.includes(responses.pair2.toLowerCase().trim())) points++;
+
+                testResults.abstraction = {
+                    score: points,
+                    maxScore: 2,
+                    passed: points >= 1
+                };
+            }
+
+            await saveTestResult('abstraction', testResults.abstraction);
+            updateProgress('abstractionProgress', 100);
+            setTimeout(() => showResults(), 500);
+        }
+
+        // ========== REPETITION TEST ==========
+        async function submitRepetitionTest() {
+            const responses = {
+                sentence1: document.getElementById('repetitionSentence1').value,
+                sentence2: document.getElementById('repetitionSentence2').value
+            };
+
+            updateProgress('repetitionProgress', 50);
+
+            try {
+                const response = await fetch(`${API_URL}?action=score-test`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        testType: 'repetition',
+                        responses: responses,
+                        language: currentLang
+                    })
+                });
+                const data = await response.json();
+
+                testResults.repetition = {
+                    score: data.result.score.points,
+                    maxScore: 2,
+                    passed: data.result.interpretation.passed
+                };
+            } catch (error) {
+                testResults.repetition = {
+                    score: 0,
+                    maxScore: 2,
+                    passed: false
+                };
+            }
+
+            await saveTestResult('repetition', testResults.repetition);
+            updateProgress('repetitionProgress', 100);
+            setTimeout(() => showResults(), 500);
+        }
+
+        // ========== LETTER FLUENCY TEST ==========
+        let letterFluencyTimer = null;
+        let letterWords = [];
+
+        function startLetterFluencyTest() {
+            const input = document.getElementById('letterFluencyInput');
+            input.disabled = false;
+            input.focus();
+            letterWords = [];
+            let timeRemaining = 60;
+
+            updateProgress('letterFluencyProgress', 0);
+
+            input.addEventListener('input', handleLetterFluencyInput);
+            input.addEventListener('keypress', handleLetterFluencyKeypress);
+
+            letterFluencyTimer = setInterval(() => {
+                timeRemaining--;
+                document.getElementById('letterFluencyTimer').textContent = timeRemaining;
+                updateProgress('letterFluencyProgress', ((60 - timeRemaining) / 60) * 100);
+
+                if (timeRemaining <= 0) {
+                    clearInterval(letterFluencyTimer);
+                    input.disabled = true;
+                    finishLetterFluencyTest();
+                }
+            }, 1000);
+        }
+
+        function handleLetterFluencyInput(e) {
+            const value = e.target.value;
+            if (value.includes(',') || value.includes('\n')) {
+                const words = value.split(/[,\n]/).map(w => w.trim().toLowerCase()).filter(w => w.length > 0 && w.startsWith('f'));
+                words.forEach(word => {
+                    if (!letterWords.includes(word)) {
+                        letterWords.push(word);
+                    }
+                });
+                e.target.value = '';
+                updateLetterWordDisplay();
+            }
+        }
+
+        function handleLetterFluencyKeypress(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const word = e.target.value.trim().toLowerCase();
+                if (word && word.startsWith('f') && !letterWords.includes(word)) {
+                    letterWords.push(word);
+                    e.target.value = '';
+                    updateLetterWordDisplay();
+                }
+            }
+        }
+
+        function updateLetterWordDisplay() {
+            document.getElementById('letterWordCount').textContent = letterWords.length;
+            document.getElementById('letterWordList').innerHTML = letterWords.map(w =>
+                `<span style="display: inline-block; padding: 5px 10px; background: #e0e0e0; border-radius: 15px; margin: 2px; font-size: 0.9em;">${w}</span>`
+            ).join('');
+        }
+
+        async function finishLetterFluencyTest() {
+            try {
+                const response = await fetch(`${API_URL}?action=score-test`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        testType: 'letter-fluency',
+                        responses: { items: letterWords, timeInSeconds: 60 }
+                    })
+                });
+                const data = await response.json();
+
+                testResults.letterFluency = {
+                    score: letterWords.length,
+                    mocaPoints: data.result.score.mocaPoints,
+                    passed: data.result.interpretation.passed
+                };
+            } catch (error) {
+                testResults.letterFluency = {
+                    score: letterWords.length,
+                    mocaPoints: letterWords.length >= 11 ? 1 : 0,
+                    passed: letterWords.length >= 11
+                };
+            }
+
+            await saveTestResult('letter-fluency', testResults.letterFluency);
+            updateProgress('letterFluencyProgress', 100);
+            setTimeout(() => showResults(), 500);
+        }
+
+        // ========== VOICE RECORDING ==========
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let currentRecordingField = null;
+
+        async function toggleRecording(fieldId) {
+            const btn = document.getElementById('recordBtn' + (fieldId === 'repetition1' ? '1' : '2'));
+
+            if (mediaRecorder && mediaRecorder.state === 'recording') {
+                // Stop recording
+                mediaRecorder.stop();
+                btn.innerHTML = '🎤 <span data-translate="record">Record</span>';
+                btn.classList.remove('recording');
+            } else {
+                // Start recording
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+                    audioChunks = [];
+                    currentRecordingField = fieldId;
+
+                    mediaRecorder.ondataavailable = (e) => {
+                        audioChunks.push(e.data);
+                    };
+
+                    mediaRecorder.onstop = async () => {
+                        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                        await transcribeAudio(audioBlob, currentRecordingField);
+                        stream.getTracks().forEach(track => track.stop());
+                    };
+
+                    mediaRecorder.start();
+                    btn.innerHTML = '⏹ <span data-translate="stop">Stop</span>';
+                    btn.classList.add('recording');
+                    btn.style.background = '#dc3545';
+                } catch (error) {
+                    console.error('Microphone access denied:', error);
+                    alert('Please allow microphone access to use voice input.');
+                }
+            }
+        }
+
+        async function transcribeAudio(audioBlob, fieldId) {
+            const inputId = fieldId === 'repetition1' ? 'repetitionSentence1' : 'repetitionSentence2';
+            const input = document.getElementById(inputId);
+            input.value = 'Transcribing...';
+
+            try {
+                // Convert blob to base64
+                const reader = new FileReader();
+                reader.readAsDataURL(audioBlob);
+                reader.onloadend = async () => {
+                    const base64Audio = reader.result.split(',')[1];
+
+                    const response = await fetch(`${API_URL}?action=transcribe`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            audio: base64Audio,
+                            language: currentLang
+                        })
+                    });
+
+                    const data = await response.json();
+                    if (data.success) {
+                        input.value = data.transcript;
+                    } else {
+                        input.value = '';
+                        alert('Transcription failed. Please type your answer.');
+                    }
+                };
+            } catch (error) {
+                console.error('Transcription error:', error);
+                input.value = '';
+                alert('Transcription failed. Please type your answer.');
+            }
+        }
+
+        // ========== EXTENDED START TEST FUNCTION ==========
+        const originalStartTest = startTest;
+        startTest = function(testType) {
+            currentTest = testType;
+            document.getElementById('homeScreen').style.display = 'none';
+            document.getElementById('resultsSection').classList.remove('active');
+
+            document.querySelectorAll('.test-interface').forEach(test => {
+                test.classList.remove('active');
+            });
+
+            switch(testType) {
+                case 'memory':
+                    document.getElementById('memoryTest').classList.add('active');
+                    updateProgress('memoryProgress', 0);
+                    break;
+                case 'trail':
+                    document.getElementById('trailTest').classList.add('active');
+                    updateProgress('trailProgress', 0);
+                    document.getElementById('trailPhase1').style.display = 'block';
+                    document.getElementById('trailPhase2').style.display = 'none';
+                    break;
+                case 'fluency':
+                    document.getElementById('fluencyTest').classList.add('active');
+                    updateProgress('fluencyProgress', 0);
+                    break;
+                case 'orientation':
+                    document.getElementById('orientationTest').classList.add('active');
+                    updateProgress('orientationProgress', 0);
+                    break;
+                case 'naming':
+                    document.getElementById('namingTest').classList.add('active');
+                    updateProgress('namingProgress', 0);
+                    break;
+                case 'digitSpan':
+                    document.getElementById('digitSpanTest').classList.add('active');
+                    updateProgress('digitSpanProgress', 0);
+                    document.getElementById('digitSpanPhase1').style.display = 'block';
+                    document.getElementById('digitSpanPhase2').style.display = 'none';
+                    document.getElementById('digitSpanPhase3').style.display = 'none';
+                    break;
+                case 'serial7':
+                    document.getElementById('serial7Test').classList.add('active');
+                    updateProgress('serial7Progress', 0);
+                    break;
+                case 'vigilance':
+                    document.getElementById('vigilanceTest').classList.add('active');
+                    updateProgress('vigilanceProgress', 0);
+                    document.getElementById('vigilancePhase1').style.display = 'block';
+                    document.getElementById('vigilancePhase2').style.display = 'none';
+                    document.getElementById('vigilanceTapBtn').disabled = false;
+                    break;
+                case 'abstraction':
+                    document.getElementById('abstractionTest').classList.add('active');
+                    updateProgress('abstractionProgress', 0);
+                    break;
+                case 'repetition':
+                    document.getElementById('repetitionTest').classList.add('active');
+                    updateProgress('repetitionProgress', 0);
+                    break;
+                case 'letterFluency':
+                    document.getElementById('letterFluencyTest').classList.add('active');
+                    updateProgress('letterFluencyProgress', 0);
+                    document.getElementById('letterFluencyTimer').textContent = '60';
+                    document.getElementById('letterWordCount').textContent = '0';
+                    document.getElementById('letterWordList').innerHTML = '';
+                    letterWords = [];
+                    break;
+            }
+        };
+    </script>
+</body>
+</html>
