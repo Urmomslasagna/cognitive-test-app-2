@@ -7,15 +7,40 @@
     <title>Cognitive Health Screening</title>
     <style>
         :root {
-            --primary-color: #2c5aa0;
-            --secondary-color: #6c757d;
-            --success-color: #28a745;
-            --warning-color: #ffc107;
-            --danger-color: #dc3545;
-            --text-size-base: 16px;
-            --spacing-base: 0.75rem;
-            --spacing-large: 1.25rem;
-            --button-min-height: 50px;
+            /* Primary - Warm teal (calming, trustworthy) */
+            --primary-color: #2A7B6F;
+            --primary-light: #E8F4F2;
+            --primary-dark: #1D5A51;
+
+            /* Warm neutrals */
+            --cream: #FDF8F3;
+            --warm-white: #FEFCFA;
+            --sand: #F5EDE4;
+            --taupe: #8B7E74;
+
+            /* Text colors */
+            --text-dark: #2D2A26;
+            --text-medium: #5C5650;
+            --text-light: #8B8279;
+
+            /* Semantic colors */
+            --secondary-color: #6B8E87;
+            --success-color: #4A8B3C;
+            --warning-color: #C4872C;
+            --danger-color: #B84A3C;
+
+            /* Accents */
+            --accent-coral: #E07B5B;
+            --accent-gold: #D4A84B;
+
+            /* Spacing & sizing */
+            --text-size-base: 18px;
+            --spacing-base: 1rem;
+            --spacing-large: 1.5rem;
+            --button-min-height: 56px;
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
         }
 
         /* Mobile first design */
@@ -27,11 +52,11 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
             font-size: var(--text-size-base);
-            line-height: 1.5;
-            color: #333;
-            background: #f5f5f5;
+            line-height: 1.6;
+            color: var(--text-dark);
+            background: var(--cream);
             overflow-x: hidden;
             -webkit-font-smoothing: antialiased;
         }
@@ -42,46 +67,59 @@
             padding: var(--spacing-base);
         }
 
-        /* Accessibility bar - mobile optimized */
+        /* Accessibility bar - warm & inviting */
         .accessibility-bar {
-            background: white;
-            padding: 10px;
-            border-bottom: 2px solid #ddd;
+            background: var(--warm-white);
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--sand);
             position: sticky;
             top: 0;
             z-index: 1000;
+            box-shadow: 0 2px 8px rgba(45, 42, 38, 0.06);
         }
 
         .accessibility-controls {
             display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .control-group {
-            display: flex;
-            gap: 5px;
+            flex-direction: row;
+            gap: 12px;
             align-items: center;
             justify-content: center;
             flex-wrap: wrap;
         }
 
+        .control-group {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .control-group > label {
+            font-weight: 600;
+            font-size: 15px;
+            color: var(--text-medium);
+            margin-right: 4px;
+        }
+
         .language-selector {
             display: flex;
-            gap: 5px;
-            justify-content: center;
+            gap: 4px;
         }
 
         .lang-btn {
-            padding: 8px 12px;
+            padding: 10px 16px;
             border: 2px solid var(--primary-color);
-            background: white;
+            background: var(--warm-white);
             color: var(--primary-color);
             cursor: pointer;
-            border-radius: 5px;
-            font-size: 14px;
-            transition: all 0.3s;
+            border-radius: 20px;
+            font-size: 15px;
+            font-weight: 600;
+            transition: all 0.2s ease;
             touch-action: manipulation;
+        }
+
+        .lang-btn:hover {
+            background: var(--primary-light);
         }
 
         .lang-btn.active {
@@ -89,49 +127,65 @@
             color: white;
         }
 
-        /* Text size controls - mobile friendly */
+        /* Text size controls */
         .text-size-controls {
             display: flex;
-            gap: 5px;
-            justify-content: center;
+            gap: 4px;
         }
 
         .text-size-controls button {
-            width: 40px;
-            height: 40px;
+            width: 44px;
+            height: 44px;
             font-size: 18px;
-            border: 2px solid var(--primary-color);
-            background: white;
-            color: var(--primary-color);
+            font-weight: 700;
+            border: 2px solid var(--taupe);
+            background: var(--warm-white);
+            color: var(--text-medium);
             cursor: pointer;
-            border-radius: 5px;
+            border-radius: var(--radius-sm);
             touch-action: manipulation;
+            transition: all 0.2s ease;
+        }
+
+        .text-size-controls button:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
         }
 
         /* Main content */
         .main-content {
-            background: white;
-            border-radius: 10px;
-            padding: var(--spacing-base);
+            background: var(--warm-white);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-large);
             margin-top: var(--spacing-base);
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 20px rgba(45, 42, 38, 0.08);
+            border: 1px solid var(--sand);
         }
 
         h1 {
-            color: var(--primary-color);
+            font-family: Georgia, 'Times New Roman', serif;
+            color: var(--primary-dark);
             margin-bottom: var(--spacing-base);
-            font-size: 1.5em;
+            font-size: 1.75em;
+            font-weight: 700;
             text-align: center;
+            letter-spacing: -0.02em;
         }
 
         h2 {
+            font-family: Georgia, 'Times New Roman', serif;
             color: var(--primary-color);
             margin-bottom: var(--spacing-base);
-            font-size: 1.25em;
+            font-size: 1.4em;
+            font-weight: 600;
             text-align: center;
         }
 
-        /* Test cards - mobile optimized */
+        h3 {
+            font-family: Georgia, 'Times New Roman', serif;
+        }
+
+        /* Test cards - warm & inviting */
         .test-selection {
             display: grid;
             gap: var(--spacing-base);
@@ -139,57 +193,79 @@
         }
 
         .test-card {
-            background: #f8f9fa;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            padding: var(--spacing-base);
+            background: var(--warm-white);
+            border: 2px solid var(--sand);
+            border-left: 5px solid var(--primary-color);
+            border-radius: var(--radius-md);
+            padding: 18px 20px;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.2s ease;
             touch-action: manipulation;
+            position: relative;
+        }
+
+        .test-card:hover {
+            border-color: var(--primary-color);
+            box-shadow: 0 4px 16px rgba(42, 123, 111, 0.12);
+            transform: translateY(-2px);
         }
 
         .test-card:active {
-            transform: scale(0.98);
-            background: #e9ecef;
+            transform: scale(0.99);
+            box-shadow: 0 2px 8px rgba(42, 123, 111, 0.1);
         }
 
         .test-card h3 {
-            color: var(--primary-color);
-            margin-bottom: 8px;
-            font-size: 1.1em;
+            color: var(--primary-dark);
+            margin-bottom: 6px;
+            font-size: 1.15em;
+            font-weight: 600;
         }
 
         .test-card p {
-            font-size: 0.9em;
-            margin: 5px 0;
+            font-size: 0.95em;
+            color: var(--text-medium);
+            margin: 4px 0;
+            line-height: 1.5;
         }
 
         .test-duration {
-            color: var(--secondary-color);
-            font-size: 0.85em;
-            margin-top: 8px;
+            color: var(--taupe);
+            font-size: 0.88em;
+            margin-top: 10px;
+            display: inline-block;
+            background: var(--sand);
+            padding: 4px 10px;
+            border-radius: 12px;
         }
 
-        /* Buttons - mobile optimized */
+        /* Buttons - larger touch targets */
         .button {
             min-height: var(--button-min-height);
-            padding: 12px 20px;
-            font-size: 16px;
+            padding: 14px 24px;
+            font-size: 17px;
             border: none;
-            border-radius: 8px;
+            border-radius: var(--radius-md);
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.2s ease;
             font-weight: 600;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            gap: 10px;
             width: 100%;
             touch-action: manipulation;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
         }
 
         .button:active {
             transform: scale(0.98);
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
         }
 
         .button-primary {
@@ -197,9 +273,18 @@
             color: white;
         }
 
+        .button-primary:hover {
+            background: var(--primary-dark);
+        }
+
         .button-secondary {
-            background: var(--secondary-color);
-            color: white;
+            background: var(--warm-white);
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+        }
+
+        .button-secondary:hover {
+            background: var(--primary-light);
         }
 
         .button-success {
@@ -209,13 +294,13 @@
 
         .button-warning {
             background: var(--warning-color);
-            color: #333;
+            color: white;
         }
 
         /* Test interface */
         .test-interface {
             display: none;
-            animation: fadeIn 0.3s;
+            animation: fadeIn 0.3s ease;
         }
 
         .test-interface.active {
@@ -223,76 +308,85 @@
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .progress-bar {
-            background: #e0e0e0;
-            height: 25px;
-            border-radius: 12px;
+            background: var(--sand);
+            height: 28px;
+            border-radius: 14px;
             overflow: hidden;
             margin-bottom: var(--spacing-base);
+            border: 1px solid rgba(139, 126, 116, 0.2);
         }
 
         .progress-fill {
-            background: var(--primary-color);
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
             height: 100%;
-            transition: width 0.5s;
+            transition: width 0.5s ease;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            font-weight: bold;
+            font-weight: 700;
             font-size: 14px;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
         }
 
         /* Word display */
         .word-item {
-            background: #f0f4f8;
-            padding: 20px;
-            border-radius: 8px;
-            font-size: 1.3em;
+            background: var(--primary-light);
+            padding: 24px;
+            border-radius: var(--radius-md);
+            font-size: 1.4em;
             text-align: center;
-            font-weight: 600;
-            color: var(--primary-color);
+            font-weight: 700;
+            color: var(--primary-dark);
             margin: var(--spacing-base) 0;
+            border: 2px solid rgba(42, 123, 111, 0.2);
         }
 
-        /* Input groups - mobile optimized */
+        /* Input groups - larger & clearer */
         .input-group {
             margin: var(--spacing-base) 0;
         }
 
         .input-group label {
             display: block;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
             font-weight: 600;
-            color: var(--primary-color);
-            font-size: 0.95em;
+            color: var(--text-dark);
+            font-size: 1em;
         }
 
         .input-group input[type="text"],
         .input-group input[type="number"] {
             width: 100%;
-            padding: 12px;
-            font-size: 16px; /* Prevents zoom on iOS */
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            transition: border-color 0.3s;
+            padding: 16px;
+            font-size: 17px;
+            border: 2px solid var(--sand);
+            border-radius: var(--radius-md);
+            transition: all 0.2s ease;
+            background: var(--warm-white);
+            color: var(--text-dark);
         }
 
         .input-group input:focus {
             outline: none;
             border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(44, 90, 160, 0.1);
+            box-shadow: 0 0 0 4px rgba(42, 123, 111, 0.15);
+        }
+
+        .input-group input::placeholder {
+            color: var(--text-light);
         }
 
         /* Trail canvas - mobile responsive */
         #trailCanvas {
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            background: white;
+            border: 2px solid var(--sand);
+            border-radius: var(--radius-md);
+            background: var(--warm-white);
             display: block;
             margin: 0 auto;
             cursor: pointer;
@@ -301,7 +395,7 @@
             height: auto;
         }
 
-        /* Trail test instructions - mobile */
+        /* Trail test instructions - warm styling */
         .trail-options {
             display: grid;
             gap: var(--spacing-base);
@@ -309,56 +403,62 @@
         }
 
         .trail-option {
-            background: #e3f2fd;
-            padding: var(--spacing-base);
-            border-radius: 10px;
-            border: 2px solid #2196F3;
+            background: var(--primary-light);
+            padding: var(--spacing-large);
+            border-radius: var(--radius-md);
+            border: 2px solid rgba(42, 123, 111, 0.3);
         }
 
         .trail-option h3 {
-            color: #1976D2;
-            margin-bottom: 8px;
-            font-size: 1.05em;
+            color: var(--primary-dark);
+            margin-bottom: 10px;
+            font-size: 1.1em;
         }
 
         .trail-option p {
-            margin: 8px 0;
-            font-size: 0.9em;
+            margin: 10px 0;
+            font-size: 1em;
+            color: var(--text-medium);
         }
 
         .trail-option-b {
-            background: #fff3e0;
-            border-color: #ff9800;
+            background: #FFF8F0;
+            border-color: var(--warning-color);
         }
 
         .trail-option-b h3 {
-            color: #f57c00;
+            color: #8B5A2B;
         }
 
         /* Trail controls */
         .trail-stats {
             display: flex;
-            gap: 10px;
+            gap: 12px;
             justify-content: space-around;
             margin-bottom: var(--spacing-base);
             flex-wrap: wrap;
         }
 
         .stat-box {
-            background: #f5f5f5;
-            padding: 8px 15px;
-            border-radius: 5px;
-            font-size: 0.9em;
+            background: var(--sand);
+            padding: 12px 20px;
+            border-radius: var(--radius-md);
+            font-size: 1em;
             flex: 1;
-            min-width: 100px;
+            min-width: 120px;
             text-align: center;
+            border: 1px solid rgba(139, 126, 116, 0.2);
+        }
+
+        .stat-box strong {
+            color: var(--text-medium);
         }
 
         /* Results section */
         .results-section {
             display: none;
             text-align: center;
-            padding: var(--spacing-base);
+            padding: var(--spacing-large);
         }
 
         .results-section.active {
@@ -366,58 +466,64 @@
         }
 
         .result-card {
-            background: white;
-            border-radius: 10px;
-            padding: var(--spacing-base);
+            background: var(--warm-white);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-large);
             margin: var(--spacing-base) 0;
             border: 3px solid;
         }
 
         .result-pass {
             border-color: var(--success-color);
-            background: #d4edda;
+            background: #EFF8ED;
         }
 
         .result-concern {
             border-color: var(--warning-color);
-            background: #fff3cd;
+            background: #FFF8F0;
         }
 
         .result-fail {
             border-color: var(--danger-color);
-            background: #f8d7da;
+            background: #FDF2F1;
         }
 
         .result-icon {
-            font-size: 3em;
-            margin-bottom: 15px;
+            font-size: 3.5em;
+            margin-bottom: 16px;
         }
 
         .result-message {
-            font-size: 1em;
-            line-height: 1.5;
+            font-size: 1.1em;
+            line-height: 1.6;
             margin: var(--spacing-base) 0;
+            color: var(--text-dark);
         }
 
         /* Disclaimer */
         .disclaimer {
-            background: #f8f9fa;
+            background: var(--sand);
             border-left: 4px solid var(--primary-color);
+            border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
             padding: var(--spacing-base);
             margin: var(--spacing-base) 0;
-            font-size: 0.85em;
-            color: #666;
+            font-size: 0.95em;
+            color: var(--text-medium);
+        }
+
+        .disclaimer strong {
+            color: var(--primary-dark);
         }
 
         /* Loading spinner */
         .loader {
-            border: 4px solid #f3f3f3;
+            border: 4px solid var(--sand);
             border-top: 4px solid var(--primary-color);
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
+            width: 44px;
+            height: 44px;
             animation: spin 1s linear infinite;
-            margin: 20px auto;
+            margin: 24px auto;
         }
 
         @keyframes spin {
@@ -429,117 +535,140 @@
         .button-group {
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            margin-top: var(--spacing-base);
+            gap: 12px;
+            margin-top: var(--spacing-large);
         }
 
         /* Session info */
         #sessionInfo {
             margin-top: var(--spacing-base);
-            padding: 10px;
-            background: #f0f0f0;
-            border-radius: 5px;
-            font-size: 0.8em;
+            padding: 12px 16px;
+            background: var(--sand);
+            border-radius: var(--radius-sm);
+            font-size: 0.85em;
             text-align: center;
             word-break: break-all;
+            color: var(--text-medium);
         }
 
         /* Feedback */
         #trailFeedback {
             margin-top: var(--spacing-base);
-            padding: 10px;
-            border-radius: 8px;
+            padding: 14px;
+            border-radius: var(--radius-md);
             text-align: center;
-            font-weight: bold;
+            font-weight: 600;
+            font-size: 1.05em;
         }
 
-        /* Animal list */
-        #animalList {
+        /* Animal/word list */
+        #animalList, #letterWordList {
             display: flex;
             flex-wrap: wrap;
-            gap: 5px;
+            gap: 8px;
             margin-top: var(--spacing-base);
         }
 
-        #animalList span {
+        #animalList span, #letterWordList span {
             display: inline-block;
-            padding: 5px 10px;
-            background: #e0e0e0;
-            border-radius: 15px;
-            font-size: 0.9em;
+            padding: 8px 14px;
+            background: var(--primary-light);
+            border-radius: 20px;
+            font-size: 0.95em;
+            color: var(--primary-dark);
+            border: 1px solid rgba(42, 123, 111, 0.2);
+        }
+
+        /* Naming items styling */
+        .naming-item {
+            background: var(--sand) !important;
+            border: 1px solid rgba(139, 126, 116, 0.3);
+            border-radius: var(--radius-md) !important;
         }
 
         /* Tablet styles */
         @media (min-width: 768px) {
             :root {
-                --text-size-base: 18px;
-                --spacing-base: 1rem;
-                --spacing-large: 1.5rem;
-                --button-min-height: 55px;
+                --text-size-base: 19px;
+                --spacing-base: 1.25rem;
+                --spacing-large: 2rem;
+                --button-min-height: 58px;
             }
-            
+
             .container {
                 padding: var(--spacing-large);
             }
-            
-            h1 { font-size: 2em; }
-            h2 { font-size: 1.5em; }
-            
+
+            h1 { font-size: 2.1em; }
+            h2 { font-size: 1.6em; }
+
             .accessibility-controls {
                 flex-direction: row;
                 justify-content: space-between;
             }
-            
+
             .test-selection {
                 gap: var(--spacing-large);
             }
-            
+
             .trail-options {
                 grid-template-columns: 1fr 1fr;
             }
-            
+
             .button-group {
                 flex-direction: row;
                 justify-content: center;
             }
-            
+
             .button {
                 width: auto;
-                min-width: 150px;
+                min-width: 160px;
             }
-            
+
             #trailCanvas {
                 width: 700px;
                 height: 500px;
+            }
+
+            .test-card {
+                padding: 22px 24px;
             }
         }
 
         /* Desktop styles */
         @media (min-width: 1024px) {
+            :root {
+                --text-size-base: 20px;
+            }
+
             #trailCanvas {
                 width: 800px;
                 height: 600px;
             }
-            
+
             .main-content {
                 padding: var(--spacing-large);
+            }
+
+            .test-selection {
+                grid-template-columns: repeat(2, 1fr);
             }
         }
 
         /* Landscape phone */
         @media (max-width: 767px) and (orientation: landscape) {
             .accessibility-bar {
-                padding: 5px;
+                padding: 8px 12px;
             }
-            
+
             .main-content {
-                margin-top: 5px;
-                padding: 10px;
+                margin-top: 8px;
+                padding: 12px;
             }
-            
-            h1 { font-size: 1.3em; }
-            h2 { font-size: 1.15em; }
-            
+
+            h1 { font-size: 1.4em; }
+            h2 { font-size: 1.2em; }
+
             #trailCanvas {
                 height: 250px;
             }
@@ -547,25 +676,116 @@
 
         /* High contrast mode */
         body.high-contrast {
-            --primary-color: #000080;
-            --secondary-color: #000000;
+            --primary-color: #00008B;
+            --primary-dark: #000066;
+            --primary-light: #E8E8FF;
+            --cream: #FFFFFF;
+            --warm-white: #FFFFFF;
+            --sand: #F0F0F0;
+            --text-dark: #000000;
+            --text-medium: #000000;
             background: white;
             color: black;
         }
 
-        body.high-contrast button {
-            border: 3px solid black;
+        body.high-contrast .test-card,
+        body.high-contrast .button,
+        body.high-contrast input {
+            border: 3px solid black !important;
         }
 
-        /* Touch feedback */
+        body.high-contrast .test-card {
+            border-left-width: 6px !important;
+        }
+
+        /* Touch feedback - disable hover effects on touch devices */
         @media (hover: none) {
             .test-card:hover {
                 transform: none;
+                box-shadow: none;
             }
-            
+
             .button:hover {
                 transform: none;
             }
+        }
+
+        /* Voice input styles - prominent & accessible */
+        .voice-input-container {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .voice-input-container input {
+            flex: 1;
+        }
+
+        .voice-btn {
+            min-width: 110px;
+            min-height: 48px;
+            padding: 12px 18px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            touch-action: manipulation;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 8px rgba(42, 123, 111, 0.2);
+        }
+
+        .voice-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+        .voice-btn.recording {
+            background: var(--danger-color);
+            animation: recordingPulse 1.2s ease-in-out infinite;
+            box-shadow: 0 0 0 4px rgba(184, 74, 60, 0.3);
+        }
+
+        @keyframes recordingPulse {
+            0%, 100% {
+                opacity: 1;
+                box-shadow: 0 0 0 4px rgba(184, 74, 60, 0.3);
+            }
+            50% {
+                opacity: 0.85;
+                box-shadow: 0 0 0 8px rgba(184, 74, 60, 0.15);
+            }
+        }
+
+        .voice-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Focus states for accessibility */
+        .button:focus,
+        .voice-btn:focus,
+        .lang-btn:focus,
+        .text-size-controls button:focus,
+        .test-card:focus {
+            outline: 3px solid var(--primary-color);
+            outline-offset: 2px;
+        }
+
+        /* Intro text styling */
+        .intro-text {
+            text-align: center;
+            margin-bottom: var(--spacing-base);
+            color: var(--text-medium);
+            font-size: 1.05em;
+            line-height: 1.6;
         }
     </style>
 </head>
@@ -704,11 +924,14 @@
                 </div>
 
                 <div id="memoryPhase3" class="test-phase" style="display: none;">
-                    <p data-translate="memory-recall" style="text-align: center;">Type the words you remember:</p>
-                    <div class="input-group">
+                    <p data-translate="memory-recall" style="text-align: center;">Type or speak the words you remember:</p>
+                    <div class="voice-input-container">
+                        <button class="voice-btn" onclick="startVoiceInput('recallInput')" id="voiceBtn_recallInput">
+                            🎤 <span data-translate="record">Record</span>
+                        </button>
                         <input type="text" id="recallInput" placeholder="Enter words separated by commas">
                     </div>
-                    <button class="button button-primary" onclick="submitMemoryTest()">
+                    <button class="button button-primary" onclick="submitMemoryTest()" style="margin-top: 15px;">
                         <span data-translate="submit">Submit</span>
                     </button>
                 </div>
@@ -776,17 +999,22 @@
                 <div class="progress-bar">
                     <div class="progress-fill" id="fluencyProgress">0%</div>
                 </div>
-                
+
                 <h2 data-translate="fluency-test-header">Fluency Test</h2>
-                
+
                 <div id="fluencyPhase1" class="test-phase">
                     <p data-translate="fluency-instructions" style="text-align: center;">Name as many animals as you can in 60 seconds.</p>
-                    
+
                     <div class="input-group">
                         <label for="fluencyInput" data-translate="animals-label">Animals:</label>
-                        <input type="text" id="fluencyInput" placeholder="Type animal names...">
+                        <div class="voice-input-container">
+                            <button class="voice-btn" onclick="startVoiceInput('fluencyInput', true)" id="voiceBtn_fluencyInput">
+                                🎤 <span data-translate="record">Record</span>
+                            </button>
+                            <input type="text" id="fluencyInput" placeholder="Type or speak animal names...">
+                        </div>
                     </div>
-                    
+
                     <div class="trail-stats" style="margin: 15px 0;">
                         <div class="stat-box">
                             <strong data-translate="time-remaining">Time:</strong> <span id="fluencyTimer">60</span>s
@@ -795,11 +1023,11 @@
                             <strong data-translate="count">Count:</strong> <span id="animalCount">0</span>
                         </div>
                     </div>
-                    
+
                     <button class="button button-primary" onclick="startFluencyTest()">
                         <span data-translate="start-timer">Start</span>
                     </button>
-                    
+
                     <div id="animalList"></div>
                 </div>
             </div>
@@ -864,17 +1092,32 @@
 
                     <div class="naming-item" style="background: #f0f4f8; padding: 20px; border-radius: 8px; margin: 15px 0;">
                         <p style="font-size: 1.1em;" data-translate="naming-animal1-desc">Large cat with a mane, known as the king of the jungle</p>
-                        <input type="text" id="namingAnimal1" placeholder="Animal name" style="margin-top: 10px;">
+                        <div class="voice-input-container" style="margin-top: 10px;">
+                            <button class="voice-btn" onclick="startVoiceInput('namingAnimal1')" id="voiceBtn_namingAnimal1">
+                                🎤 <span data-translate="record">Record</span>
+                            </button>
+                            <input type="text" id="namingAnimal1" placeholder="Animal name">
+                        </div>
                     </div>
 
                     <div class="naming-item" style="background: #f0f4f8; padding: 20px; border-radius: 8px; margin: 15px 0;">
                         <p style="font-size: 1.1em;" data-translate="naming-animal2-desc">Large gray animal with a horn on its nose</p>
-                        <input type="text" id="namingAnimal2" placeholder="Animal name" style="margin-top: 10px;">
+                        <div class="voice-input-container" style="margin-top: 10px;">
+                            <button class="voice-btn" onclick="startVoiceInput('namingAnimal2')" id="voiceBtn_namingAnimal2">
+                                🎤 <span data-translate="record">Record</span>
+                            </button>
+                            <input type="text" id="namingAnimal2" placeholder="Animal name">
+                        </div>
                     </div>
 
                     <div class="naming-item" style="background: #f0f4f8; padding: 20px; border-radius: 8px; margin: 15px 0;">
                         <p style="font-size: 1.1em;" data-translate="naming-animal3-desc">Desert animal with one or two humps on its back</p>
-                        <input type="text" id="namingAnimal3" placeholder="Animal name" style="margin-top: 10px;">
+                        <div class="voice-input-container" style="margin-top: 10px;">
+                            <button class="voice-btn" onclick="startVoiceInput('namingAnimal3')" id="voiceBtn_namingAnimal3">
+                                🎤 <span data-translate="record">Record</span>
+                            </button>
+                            <input type="text" id="namingAnimal3" placeholder="Animal name">
+                        </div>
                     </div>
 
                     <button class="button button-primary" onclick="submitNamingTest()">
@@ -995,12 +1238,22 @@
 
                     <div class="naming-item" style="background: #e3f2fd; padding: 20px; border-radius: 8px; margin: 15px 0;">
                         <p style="font-size: 1.3em; font-weight: bold; text-align: center;" data-translate="abstraction-pair1">Banana and Orange</p>
-                        <input type="text" id="abstractionPair1" placeholder="What are they both?" style="margin-top: 10px;">
+                        <div class="voice-input-container" style="margin-top: 10px;">
+                            <button class="voice-btn" onclick="startVoiceInput('abstractionPair1')" id="voiceBtn_abstractionPair1">
+                                🎤 <span data-translate="record">Record</span>
+                            </button>
+                            <input type="text" id="abstractionPair1" placeholder="What are they both?">
+                        </div>
                     </div>
 
                     <div class="naming-item" style="background: #fff3e0; padding: 20px; border-radius: 8px; margin: 15px 0;">
                         <p style="font-size: 1.3em; font-weight: bold; text-align: center;" data-translate="abstraction-pair2">Train and Bicycle</p>
-                        <input type="text" id="abstractionPair2" placeholder="What are they both?" style="margin-top: 10px;">
+                        <div class="voice-input-container" style="margin-top: 10px;">
+                            <button class="voice-btn" onclick="startVoiceInput('abstractionPair2')" id="voiceBtn_abstractionPair2">
+                                🎤 <span data-translate="record">Record</span>
+                            </button>
+                            <input type="text" id="abstractionPair2" placeholder="What are they both?">
+                        </div>
                     </div>
 
                     <button class="button button-primary" onclick="submitAbstractionTest()">
@@ -1023,20 +1276,20 @@
                     <div class="naming-item" style="background: #f0f4f8; padding: 20px; border-radius: 8px; margin: 15px 0;">
                         <p style="font-size: 1.1em; font-style: italic;" data-translate="repetition-sentence1">"I only know that John is the one to help today."</p>
                         <div class="voice-input-container" style="margin-top: 10px;">
-                            <button class="button button-secondary" onclick="toggleRecording('repetition1')" id="recordBtn1" style="width: auto;">
+                            <button class="voice-btn" onclick="startVoiceInput('repetitionSentence1')" id="voiceBtn_repetitionSentence1">
                                 🎤 <span data-translate="record">Record</span>
                             </button>
-                            <input type="text" id="repetitionSentence1" placeholder="Type or speak the sentence" style="flex: 1;">
+                            <input type="text" id="repetitionSentence1" placeholder="Type or speak the sentence">
                         </div>
                     </div>
 
                     <div class="naming-item" style="background: #f0f4f8; padding: 20px; border-radius: 8px; margin: 15px 0;">
                         <p style="font-size: 1.1em; font-style: italic;" data-translate="repetition-sentence2">"The cat always hid under the couch when dogs were in the room."</p>
                         <div class="voice-input-container" style="margin-top: 10px;">
-                            <button class="button button-secondary" onclick="toggleRecording('repetition2')" id="recordBtn2" style="width: auto;">
+                            <button class="voice-btn" onclick="startVoiceInput('repetitionSentence2')" id="voiceBtn_repetitionSentence2">
                                 🎤 <span data-translate="record">Record</span>
                             </button>
-                            <input type="text" id="repetitionSentence2" placeholder="Type or speak the sentence" style="flex: 1;">
+                            <input type="text" id="repetitionSentence2" placeholder="Type or speak the sentence">
                         </div>
                     </div>
 
@@ -1060,7 +1313,12 @@
 
                     <div class="input-group">
                         <label for="letterFluencyInput" data-translate="words-label">Words:</label>
-                        <input type="text" id="letterFluencyInput" placeholder="Type words starting with F...">
+                        <div class="voice-input-container">
+                            <button class="voice-btn" onclick="startVoiceInput('letterFluencyInput', true)" id="voiceBtn_letterFluencyInput">
+                                🎤 <span data-translate="record">Record</span>
+                            </button>
+                            <input type="text" id="letterFluencyInput" placeholder="Type or speak words starting with F...">
+                        </div>
                     </div>
 
                     <div class="trail-stats" style="margin: 15px 0;">
@@ -1226,7 +1484,10 @@
                 'letter-fluency-test-header': 'Letter Fluency Test',
                 'letter-fluency-instructions': 'Name as many words as you can that start with the letter "F" in 60 seconds.',
                 'letter-fluency-note': '(No proper nouns or names)',
-                'words-label': 'Words:'
+                'words-label': 'Words:',
+                'transcribing': 'Transcribing',
+                'mic-error': 'Please allow microphone access to use voice input.',
+                'transcription-failed': 'Transcription failed. Please type your answer.'
             },
             es: {
                 'title': 'Evaluación Cognitiva',
@@ -1336,7 +1597,10 @@
                 'letter-fluency-test-header': 'Prueba de Fluidez de Letras',
                 'letter-fluency-instructions': 'Nombre tantas palabras como pueda que empiecen con "F" en 60 segundos.',
                 'letter-fluency-note': '(Sin nombres propios)',
-                'words-label': 'Palabras:'
+                'words-label': 'Palabras:',
+                'transcribing': 'Transcribiendo',
+                'mic-error': 'Por favor permita el acceso al micrófono para usar la entrada de voz.',
+                'transcription-failed': 'Transcripción fallida. Por favor escriba su respuesta.'
             },
             zh: {
                 'title': '认知健康筛查',
@@ -1446,7 +1710,10 @@
                 'letter-fluency-test-header': '字母流畅性测试',
                 'letter-fluency-instructions': '在60秒内说出尽可能多的以字母"F"开头的词。',
                 'letter-fluency-note': '（不包括专有名词或人名）',
-                'words-label': '词语：'
+                'words-label': '词语：',
+                'transcribing': '正在转录',
+                'mic-error': '请允许麦克风访问以使用语音输入。',
+                'transcription-failed': '转录失败。请输入您的答案。'
             }
         };
         
@@ -2624,55 +2891,73 @@
             setTimeout(() => showResults(), 500);
         }
 
-        // ========== VOICE RECORDING ==========
+        // ========== GENERIC VOICE INPUT ==========
         let mediaRecorder = null;
         let audioChunks = [];
-        let currentRecordingField = null;
+        let currentRecordingInputId = null;
+        let currentRecordingStream = null;
+        let appendMode = false; // Whether to append transcription to existing text
 
-        async function toggleRecording(fieldId) {
-            const btn = document.getElementById('recordBtn' + (fieldId === 'repetition1' ? '1' : '2'));
+        async function startVoiceInput(inputId, shouldAppend = false) {
+            const btn = document.getElementById('voiceBtn_' + inputId);
+            const input = document.getElementById(inputId);
 
             if (mediaRecorder && mediaRecorder.state === 'recording') {
-                // Stop recording
+                // Stop current recording
                 mediaRecorder.stop();
                 btn.innerHTML = '🎤 <span data-translate="record">Record</span>';
                 btn.classList.remove('recording');
-            } else {
-                // Start recording
-                try {
-                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                    mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
-                    audioChunks = [];
-                    currentRecordingField = fieldId;
+                return;
+            }
 
-                    mediaRecorder.ondataavailable = (e) => {
-                        audioChunks.push(e.data);
-                    };
+            // Start new recording
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                currentRecordingStream = stream;
+                currentRecordingInputId = inputId;
+                appendMode = shouldAppend;
 
-                    mediaRecorder.onstop = async () => {
-                        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-                        await transcribeAudio(audioBlob, currentRecordingField);
-                        stream.getTracks().forEach(track => track.stop());
-                    };
-
-                    mediaRecorder.start();
-                    btn.innerHTML = '⏹ <span data-translate="stop">Stop</span>';
-                    btn.classList.add('recording');
-                    btn.style.background = '#dc3545';
-                } catch (error) {
-                    console.error('Microphone access denied:', error);
-                    alert('Please allow microphone access to use voice input.');
+                // Try webm first, fall back to mp4 for Safari
+                let mimeType = 'audio/webm';
+                if (!MediaRecorder.isTypeSupported('audio/webm')) {
+                    mimeType = 'audio/mp4';
                 }
+                mediaRecorder = new MediaRecorder(stream, { mimeType });
+                audioChunks = [];
+
+                mediaRecorder.ondataavailable = (e) => {
+                    if (e.data.size > 0) {
+                        audioChunks.push(e.data);
+                    }
+                };
+
+                mediaRecorder.onstop = async () => {
+                    const audioBlob = new Blob(audioChunks, { type: mimeType });
+                    await transcribeToField(audioBlob, currentRecordingInputId, appendMode);
+                    if (currentRecordingStream) {
+                        currentRecordingStream.getTracks().forEach(track => track.stop());
+                        currentRecordingStream = null;
+                    }
+                };
+
+                mediaRecorder.start();
+                btn.innerHTML = '⏹ <span data-translate="stop">Stop</span>';
+                btn.classList.add('recording');
+            } catch (error) {
+                console.error('Microphone access denied:', error);
+                alert(translations[currentLang]['mic-error'] || 'Please allow microphone access to use voice input.');
             }
         }
 
-        async function transcribeAudio(audioBlob, fieldId) {
-            const inputId = fieldId === 'repetition1' ? 'repetitionSentence1' : 'repetitionSentence2';
+        async function transcribeToField(audioBlob, inputId, shouldAppend) {
             const input = document.getElementById(inputId);
-            input.value = 'Transcribing...';
+            const btn = document.getElementById('voiceBtn_' + inputId);
+            const originalValue = input.value;
+
+            btn.disabled = true;
+            btn.innerHTML = '... <span data-translate="transcribing">Transcribing</span>';
 
             try {
-                // Convert blob to base64
                 const reader = new FileReader();
                 reader.readAsDataURL(audioBlob);
                 reader.onloadend = async () => {
@@ -2688,17 +2973,28 @@
                     });
 
                     const data = await response.json();
-                    if (data.success) {
-                        input.value = data.transcript;
+                    btn.disabled = false;
+                    btn.innerHTML = '🎤 <span data-translate="record">Record</span>';
+
+                    if (data.success && data.transcript) {
+                        if (shouldAppend && originalValue) {
+                            // For fluency tests - append comma-separated
+                            input.value = originalValue + ', ' + data.transcript;
+                        } else {
+                            input.value = data.transcript;
+                        }
+                        // Trigger input event for fluency tests
+                        input.dispatchEvent(new Event('input', { bubbles: true }));
                     } else {
-                        input.value = '';
-                        alert('Transcription failed. Please type your answer.');
+                        alert(translations[currentLang]['transcription-failed'] || 'Transcription failed. Please type your answer.');
                     }
                 };
             } catch (error) {
                 console.error('Transcription error:', error);
-                input.value = '';
-                alert('Transcription failed. Please type your answer.');
+                const btn = document.getElementById('voiceBtn_' + inputId);
+                btn.disabled = false;
+                btn.innerHTML = '🎤 <span data-translate="record">Record</span>';
+                alert(translations[currentLang]['transcription-failed'] || 'Transcription failed. Please type your answer.');
             }
         }
 

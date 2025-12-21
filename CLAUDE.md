@@ -134,9 +134,17 @@ moca_sessions (session_id, total_score, max_score, tests_completed,
 
 ## Voice Input (Whisper)
 
-The Repetition Test includes voice recording using Web Audio API:
+Voice recording is available on multiple tests using Web Audio API:
+- Memory Test (recall phase)
+- Animal Fluency Test
+- Letter Fluency Test
+- Naming Test (3 inputs)
+- Abstraction Test (2 inputs)
+- Repetition Test (2 sentences)
+
+**How it works:**
 1. User clicks Record button
-2. Audio captured as webm blob
+2. Audio captured as webm/mp4 blob
 3. Converted to base64 and sent to `/api/supabase-api?action=transcribe`
 4. Whisper API returns transcript
 5. Transcript populated in input field
