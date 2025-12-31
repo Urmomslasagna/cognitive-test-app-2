@@ -44,7 +44,7 @@ This is a cognitive health screening web application implementing MoCA (Montreal
 
 ```bash
 # Start development server
-npm run dev
+npm run start
 
 # Deploy to production
 npm run deploy
@@ -75,8 +75,10 @@ All endpoints use `/api/supabase-api?action=ACTION_NAME`
 | `transcribe` | POST | Whisper speech-to-text (supports verboseOutput for word timestamps) |
 | `health` | GET | Health check |
 | `update-session-consent` | POST | Store voice analysis consent |
-| `analyze-speech` | POST | Extract speech features and save |
-| `get-speech-analysis` | GET | Retrieve speech analysis for session |
+| `analyze-speech` | POST | Extract speech features (v2.0: extended features + task signal) |
+| `get-speech-analysis` | GET | Retrieve speech analysis for session (includes composite) |
+| `calculate-session-composite` | POST | Calculate aggregate composite score for session |
+| `compare-sessions` | POST | Compare two sessions by ID, return trend analysis |
 
 ## Code Structure
 
@@ -88,8 +90,9 @@ All endpoints use `/api/supabase-api?action=ACTION_NAME`
 
 ### API ([api/supabase-api.js](api/supabase-api.js))
 - **CognitiveTestScorer class**: Lines 5-580 (all scoring algorithms)
-- **SpeechFeatureExtractor class**: Lines 583-705 (experimental speech analysis)
-- **Handler function**: Lines 708-1170 (API routing)
+- **SpeechFeatureExtractor class**: Lines 583-1043 (experimental speech analysis v2.0)
+- **SpeechSignalCalculator class**: Lines 1045-1223 (composite scoring)
+- **Handler function**: Lines 1225-1880 (API routing)
 
 ### Scoring Algorithms (in api/supabase-api.js)
 | Method | MoCA Points | Pass Threshold |
@@ -162,7 +165,7 @@ Total score: 26 points (excludes clock drawing which requires manual evaluation)
 - Possible cognitive impairment: <26
 - Education adjustment: +1 point if ≤12 years education
 
-## Experimental Voice Analysis Feature
+## Experimental Voice Analysis Feature (v2.0)
 
 An **optional, experimental** speech pattern analysis feature that analyzes speech from test recordings.
 
@@ -174,7 +177,7 @@ An **optional, experimental** speech pattern analysis feature that analyzes spee
 3. If consented, dashboard shows aggregated speech patterns
 4. Analysis runs automatically after each voice-enabled test
 
-### Features Extracted
+### Features Extracted (Basic)
 - Speech rate (words per minute)
 - Pause count and duration
 - Response latency (time to first word)
@@ -182,32 +185,94 @@ An **optional, experimental** speech pattern analysis feature that analyzes spee
 - Filler word count
 - Repetition detection
 
+### Enhanced Features (v2.0)
+- **Articulation rate** - WPM excluding pauses (phonation time only)
+- **Hesitation patterns** - Short/medium/long pause distribution
+- **Rate decay** - Production decline over time (first/middle/last thirds)
+- **Inter-word variability** - Rhythm consistency (coefficient of variation)
+- **Mean Length of Utterance (MLU)** - Average words per sentence
+- **Disfluency analysis** - Fillers, restarts, fragments
+- **POS ratios** - Content vs function word estimation
+- **Semantic coherence** - Task-specific vocabulary matching
+
+### Composite Scoring System
+- **Task Signal (0-100)** - Per-test weighted score based on task type
+- **Session Composite** - Aggregated "Cognitive Speech Signal Index"
+- **Reliability score** - Based on data completeness
+- **Session comparison** - Compare signals between two sessions
+
+### Task-Aware Analysis
+Different tests have different speech expectations:
+| Test Type | Key Metrics | Expectations |
+|-----------|-------------|--------------|
+| Fluency | Rate decay, clustering | Rapid generation |
+| Memory | Response latency, hesitation | Retrieval effort visible |
+| Repetition | Articulation clarity, rhythm | Careful, accurate speech |
+| Naming | Word retrieval time | Response timing reflects retrieval |
+| Abstraction | Thinking pauses, elaboration | Pauses reflect conceptual processing |
+
 ### API Endpoints (Speech Analysis)
 | Action | Method | Description |
 |--------|--------|-------------|
 | `update-session-consent` | POST | Store voice analysis consent |
-| `analyze-speech` | POST | Extract features and save analysis |
-| `get-speech-analysis` | GET | Retrieve analysis for session |
+| `analyze-speech` | POST | Extract features, extended features, task signal |
+| `get-speech-analysis` | GET | Retrieve analysis for session (includes composite) |
+| `calculate-session-composite` | POST | Calculate aggregate composite for session |
+| `compare-sessions` | POST | Compare two sessions, return trend |
 
-### Database Schema (Additional)
+### Database Schema (Speech Analysis)
 ```sql
 -- Add to sessions table
-ALTER TABLE sessions ADD COLUMN voice_analysis_consent BOOLEAN DEFAULT FALSE;
-ALTER TABLE sessions ADD COLUMN consent_timestamp TIMESTAMP;
+ALTER TABLE sessions ADD COLUMN IF NOT EXISTS voice_analysis_consent BOOLEAN DEFAULT FALSE;
+ALTER TABLE sessions ADD COLUMN IF NOT EXISTS consent_timestamp TIMESTAMP;
 
--- New speech analysis table
-CREATE TABLE speech_analysis (
+-- Speech analysis table (enhanced v2.0)
+CREATE TABLE IF NOT EXISTS speech_analysis (
     id SERIAL PRIMARY KEY,
     session_id VARCHAR(100) NOT NULL,
     test_type VARCHAR(50) NOT NULL,
     features JSONB NOT NULL,
     interpretation JSONB,
     language VARCHAR(10) DEFAULT 'en',
+    extended_features JSONB,
+    task_signal INTEGER,
+    signal_confidence DECIMAL(3,2),
+    version VARCHAR(10) DEFAULT '2.0',
     created_at TIMESTAMP DEFAULT NOW()
 );
+
+CREATE INDEX IF NOT EXISTS idx_speech_analysis_session ON speech_analysis(session_id);
+
+-- Session composite table (v2.0)
+CREATE TABLE IF NOT EXISTS session_speech_composite (
+    id SERIAL PRIMARY KEY,
+    session_id VARCHAR(100) NOT NULL,
+    composite_signal INTEGER,
+    tasks_included INTEGER,
+    task_breakdown JSONB,
+    reliability DECIMAL(3,2),
+    interpretation TEXT,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_composite_session ON session_speech_composite(session_id);
+
+-- Enable RLS (run if using Supabase Row Level Security)
+ALTER TABLE speech_analysis ENABLE ROW LEVEL SECURITY;
+ALTER TABLE session_speech_composite ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY IF NOT EXISTS "Allow anonymous insert speech_analysis" ON speech_analysis
+    FOR INSERT WITH CHECK (true);
+CREATE POLICY IF NOT EXISTS "Allow anonymous read speech_analysis" ON speech_analysis
+    FOR SELECT USING (true);
+CREATE POLICY IF NOT EXISTS "Allow anonymous insert composite" ON session_speech_composite
+    FOR INSERT WITH CHECK (true);
+CREATE POLICY IF NOT EXISTS "Allow anonymous read composite" ON session_speech_composite
+    FOR SELECT USING (true);
 ```
 
 ### Key Files
-- `SpeechFeatureExtractor` class in [api/supabase-api.js](api/supabase-api.js)
+- `SpeechFeatureExtractor` class in [api/supabase-api.js](api/supabase-api.js) - 8 enhanced extraction methods
+- `SpeechSignalCalculator` class in [api/supabase-api.js](api/supabase-api.js) - Composite scoring
 - Consent/Dashboard UI in [public/index.html](public/index.html)
-- Translations: 45+ keys in EN/ES/ZH for voice analysis feature
+- Translations: 50+ keys in EN/ES/ZH for voice analysis feature

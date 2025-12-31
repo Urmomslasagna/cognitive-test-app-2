@@ -904,6 +904,238 @@
             padding: 8px 0;
             color: var(--text-medium);
         }
+
+        /* Enhanced Voice Analysis Dashboard v2.0 */
+        .va-composite-card {
+            background: linear-gradient(135deg, var(--primary-light) 0%, var(--sand) 100%);
+            border: 2px solid var(--primary-color);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-large);
+            text-align: center;
+            margin: var(--spacing-base) 0;
+        }
+
+        .va-composite-header {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: var(--spacing-base);
+        }
+
+        .va-composite-header h3 {
+            color: var(--primary-dark);
+            margin: 0;
+        }
+
+        .experimental-badge-small {
+            background: var(--warning-color);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.65em;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .va-composite-score {
+            margin: var(--spacing-base) 0;
+        }
+
+        .va-composite-score span:first-child {
+            font-size: 3em;
+            font-weight: 700;
+            color: var(--primary-dark);
+        }
+
+        .va-composite-max {
+            font-size: 1.2em;
+            color: var(--text-medium);
+        }
+
+        .va-composite-interpretation {
+            color: var(--text-medium);
+            font-size: 0.95em;
+            margin: 10px 0;
+        }
+
+        .va-composite-meta {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            font-size: 0.85em;
+            color: var(--text-light);
+        }
+
+        .va-patterns-section {
+            background: var(--warm-white);
+            border: 1px solid var(--sand);
+            border-radius: var(--radius-md);
+            padding: var(--spacing-base);
+            margin: var(--spacing-base) 0;
+        }
+
+        .va-patterns-section h3 {
+            color: var(--primary-dark);
+            margin-bottom: 12px;
+        }
+
+        .va-patterns-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .va-patterns-list li {
+            background: var(--sand);
+            padding: 10px 14px;
+            border-radius: var(--radius-sm);
+            margin: 8px 0;
+            color: var(--text-medium);
+            font-size: 0.95em;
+            position: relative;
+            padding-left: 28px;
+        }
+
+        .va-patterns-list li::before {
+            content: "•";
+            position: absolute;
+            left: 12px;
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        .va-task-signal-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        .va-task-signal-high {
+            background: #D4EDDA;
+            color: #155724;
+        }
+
+        .va-task-signal-medium {
+            background: #FFF3CD;
+            color: #856404;
+        }
+
+        .va-task-signal-low {
+            background: #F8D7DA;
+            color: #721C24;
+        }
+
+        .va-comparison-section {
+            background: var(--warm-white);
+            border: 1px solid var(--sand);
+            border-radius: var(--radius-md);
+            padding: var(--spacing-base);
+        }
+
+        .va-comparison-section h3 {
+            color: var(--primary-dark);
+            margin-bottom: 8px;
+        }
+
+        .va-comparison-desc {
+            color: var(--text-medium);
+            font-size: 0.9em;
+            margin-bottom: 12px;
+        }
+
+        .va-comparison-input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .va-comparison-input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid var(--sand);
+            border-radius: var(--radius-sm);
+            font-size: 1em;
+        }
+
+        .va-comparison-results {
+            background: var(--sand);
+            border-radius: var(--radius-md);
+            padding: var(--spacing-base);
+        }
+
+        .va-comparison-trend {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin: var(--spacing-base) 0;
+        }
+
+        .va-trend-arrow {
+            font-size: 2em;
+        }
+
+        .va-trend-improvement {
+            color: var(--success-color);
+        }
+
+        .va-trend-stable {
+            color: var(--text-medium);
+        }
+
+        .va-trend-decline {
+            color: var(--warning-color);
+        }
+
+        .va-comparison-disclaimer {
+            font-size: 0.85em;
+            color: var(--text-light);
+            font-style: italic;
+            margin-top: 12px;
+        }
+
+        /* Enhanced test card with task signal */
+        .va-test-card-enhanced {
+            background: var(--warm-white);
+            border: 1px solid var(--sand);
+            border-radius: var(--radius-md);
+            padding: var(--spacing-base);
+            margin: 12px 0;
+        }
+
+        .va-test-card-enhanced .va-test-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .va-test-card-enhanced h4 {
+            color: var(--primary-dark);
+            margin: 0;
+        }
+
+        .va-extended-metrics {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px dashed var(--sand);
+        }
+
+        .va-extended-metric {
+            font-size: 0.85em;
+            color: var(--text-medium);
+        }
+
+        .va-extended-metric strong {
+            color: var(--text-dark);
+        }
     </style>
 </head>
 <body>
@@ -1542,6 +1774,31 @@
                     </ul>
                 </div>
 
+                <!-- Enhanced: Composite Signal Card (v2.0) -->
+                <div id="vaCompositeCard" class="va-composite-card" style="display: none;">
+                    <div class="va-composite-header">
+                        <h3 data-translate="va-composite-title">Speech Signal Index</h3>
+                        <span class="experimental-badge-small" data-translate="experimental-badge">Experimental</span>
+                    </div>
+                    <div class="va-composite-score">
+                        <span id="vaCompositeValue">--</span>
+                        <span class="va-composite-max">/100</span>
+                    </div>
+                    <p id="vaCompositeInterpretation" class="va-composite-interpretation"></p>
+                    <div class="va-composite-meta">
+                        <span id="vaTasksIncluded">0 tests analyzed</span>
+                        <span id="vaReliability">Reliability: --</span>
+                    </div>
+                </div>
+
+                <!-- Enhanced: Pattern Observations (v2.0) -->
+                <div id="vaPatterns" class="va-patterns-section" style="display: none;">
+                    <h3 data-translate="va-patterns-title">Pattern Observations</h3>
+                    <ul id="vaPatternsList" class="va-patterns-list">
+                        <!-- Patterns loaded dynamically -->
+                    </ul>
+                </div>
+
                 <div id="vaSummary" style="display: none;">
                     <h3 data-translate="va-summary-title">Session Observations</h3>
                     <p data-translate="va-summary-desc" style="color: var(--text-medium); margin-bottom: 15px;">Patterns observed from your test recordings:</p>
@@ -1557,6 +1814,21 @@
                     <h3 data-translate="va-breakdown-title">Per-Test Patterns</h3>
                     <div id="vaTestCards">
                         <!-- Test cards loaded dynamically -->
+                    </div>
+                </div>
+
+                <!-- Enhanced: Session Comparison (v2.0) -->
+                <div id="vaComparisonSection" class="va-comparison-section" style="display: none; margin-top: 20px;">
+                    <h3 data-translate="va-comparison-title">Compare With Previous Session</h3>
+                    <p class="va-comparison-desc" data-translate="va-comparison-desc">Enter a previous session ID to compare speech patterns:</p>
+                    <div class="va-comparison-input-group">
+                        <input type="text" id="vaCompareSessionId" placeholder="Previous Session ID" class="va-comparison-input">
+                        <button class="button button-secondary" onclick="compareSessions()">
+                            <span data-translate="va-compare-btn">Compare</span>
+                        </button>
+                    </div>
+                    <div id="vaComparisonResults" style="display: none;">
+                        <!-- Comparison results loaded dynamically -->
                     </div>
                 </div>
 
@@ -1756,7 +2028,13 @@
                 'va-pauses': 'Pauses',
                 'va-word-variety': 'Word Variety',
                 'va-wpm': 'wpm',
-                'va-total': 'total'
+                'va-total': 'total',
+                // Enhanced v2.0 translations
+                'va-composite-title': 'Speech Signal Index',
+                'va-patterns-title': 'Pattern Observations',
+                'va-comparison-title': 'Compare With Previous Session',
+                'va-comparison-desc': 'Enter a previous session ID to compare speech patterns:',
+                'va-compare-btn': 'Compare'
             },
             es: {
                 'title': 'Evaluación Cognitiva',
@@ -1909,7 +2187,13 @@
                 'va-pauses': 'Pausas',
                 'va-word-variety': 'Variedad',
                 'va-wpm': 'ppm',
-                'va-total': 'total'
+                'va-total': 'total',
+                // Enhanced v2.0 translations
+                'va-composite-title': 'Índice de Señal de Habla',
+                'va-patterns-title': 'Observaciones de Patrones',
+                'va-comparison-title': 'Comparar con Sesión Anterior',
+                'va-comparison-desc': 'Ingrese un ID de sesión anterior para comparar patrones de habla:',
+                'va-compare-btn': 'Comparar'
             },
             zh: {
                 'title': '认知健康筛查',
@@ -2062,7 +2346,13 @@
                 'va-pauses': '停顿',
                 'va-word-variety': '词汇多样性',
                 'va-wpm': '词/分',
-                'va-total': '总计'
+                'va-total': '总计',
+                // Enhanced v2.0 translations
+                'va-composite-title': '语音信号指数',
+                'va-patterns-title': '模式观察',
+                'va-comparison-title': '与之前会话比较',
+                'va-comparison-desc': '输入之前的会话ID以比较语音模式：',
+                'va-compare-btn': '比较'
             }
         };
         
@@ -2729,37 +3019,96 @@
             const dashboard = document.getElementById('voiceAnalysisDashboard');
             dashboard.style.display = 'block';
 
+            // Hide all sections initially
+            document.getElementById('vaEmptyState').style.display = 'none';
+            document.getElementById('vaCompositeCard').style.display = 'none';
+            document.getElementById('vaPatterns').style.display = 'none';
+            document.getElementById('vaSummary').style.display = 'none';
+            document.getElementById('vaTestBreakdown').style.display = 'none';
+            document.getElementById('vaComparisonSection').style.display = 'none';
+
             // Try to fetch analysis data
             try {
                 const response = await fetch(`${API_URL}?action=get-speech-analysis&sessionId=${sessionId}`);
                 const data = await response.json();
 
                 if (data.success && data.results && data.results.length > 0) {
-                    displaySpeechAnalysisResults(data.results);
+                    displaySpeechAnalysisResults(data.results, data.composite);
+
+                    // If no composite exists, calculate it now
+                    if (!data.composite) {
+                        calculateAndDisplayComposite();
+                    }
                 } else {
                     // Show empty state
                     document.getElementById('vaEmptyState').style.display = 'block';
-                    document.getElementById('vaSummary').style.display = 'none';
-                    document.getElementById('vaTestBreakdown').style.display = 'none';
                 }
             } catch (error) {
                 console.log('Could not fetch speech analysis:', error);
-                // Show empty state on error
                 document.getElementById('vaEmptyState').style.display = 'block';
-                document.getElementById('vaSummary').style.display = 'none';
-                document.getElementById('vaTestBreakdown').style.display = 'none';
             }
 
             applyTranslations();
         }
 
-        function displaySpeechAnalysisResults(results) {
+        async function calculateAndDisplayComposite() {
+            try {
+                const response = await fetch(`${API_URL}?action=calculate-session-composite`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sessionId })
+                });
+                const data = await response.json();
+
+                if (data.success && data.composite) {
+                    displayCompositeScore(data.composite);
+                }
+            } catch (error) {
+                console.log('Could not calculate composite:', error);
+            }
+        }
+
+        function displayCompositeScore(composite) {
+            const card = document.getElementById('vaCompositeCard');
+            card.style.display = 'block';
+
+            document.getElementById('vaCompositeValue').textContent = composite.compositeSignal || '--';
+            document.getElementById('vaCompositeInterpretation').textContent = composite.interpretation || '';
+            document.getElementById('vaTasksIncluded').textContent = `${composite.tasksIncluded || 0} tests analyzed`;
+            document.getElementById('vaReliability').textContent = `Reliability: ${composite.reliability ? (composite.reliability * 100).toFixed(0) + '%' : '--'}`;
+        }
+
+        function displaySpeechAnalysisResults(results, composite) {
             const lang = translations[currentLang];
 
-            // Hide empty state, show summary
-            document.getElementById('vaEmptyState').style.display = 'none';
+            // Show main sections
             document.getElementById('vaSummary').style.display = 'block';
             document.getElementById('vaTestBreakdown').style.display = 'block';
+            document.getElementById('vaComparisonSection').style.display = 'block';
+
+            // Display composite if available
+            if (composite) {
+                displayCompositeScore(composite);
+            }
+
+            // Collect all patterns/observations from results
+            const allPatterns = [];
+            results.forEach(r => {
+                if (r.interpretation && r.interpretation.observations) {
+                    r.interpretation.observations.forEach(obs => {
+                        if (!allPatterns.includes(obs)) {
+                            allPatterns.push(obs);
+                        }
+                    });
+                }
+            });
+
+            // Display patterns section if we have any
+            if (allPatterns.length > 0) {
+                document.getElementById('vaPatterns').style.display = 'block';
+                const patternsList = document.getElementById('vaPatternsList');
+                patternsList.innerHTML = allPatterns.slice(0, 6).map(p => `<li>${p}</li>`).join('');
+            }
 
             // Calculate aggregate stats
             let totalWpm = 0;
@@ -2798,28 +3147,115 @@
                 </div>
             `;
 
-            // Populate per-test breakdown
+            // Populate per-test breakdown with enhanced cards
             const testCards = document.getElementById('vaTestCards');
-            testCards.innerHTML = results.map(r => `
-                <div class="va-test-card" style="background: var(--sand); padding: 12px; border-radius: 8px; margin: 10px 0;">
-                    <strong>${formatTestName(r.test_type)}</strong>
-                    <div style="display: flex; gap: 15px; margin-top: 8px; flex-wrap: wrap;">
+            testCards.innerHTML = results.map(r => {
+                const taskSignal = r.task_signal;
+                const signalClass = taskSignal >= 70 ? 'va-task-signal-high' :
+                                   (taskSignal >= 40 ? 'va-task-signal-medium' : 'va-task-signal-low');
+                const ext = r.extended_features || {};
+
+                return `
+                <div class="va-test-card-enhanced">
+                    <div class="va-test-header">
+                        <h4>${formatTestName(r.test_type)}</h4>
+                        ${taskSignal !== undefined ? `<span class="va-task-signal-badge ${signalClass}">${taskSignal}</span>` : ''}
+                    </div>
+                    <div style="display: flex; gap: 15px; flex-wrap: wrap;">
                         ${r.features.speechRate ? `<span>${Math.round(r.features.speechRate)} ${lang['va-wpm'] || 'wpm'}</span>` : ''}
                         ${r.features.pauseCount !== undefined ? `<span>${r.features.pauseCount} ${lang['va-pauses'] || 'pauses'}</span>` : ''}
                         ${r.features.wordCount ? `<span>${r.features.wordCount} words</span>` : ''}
                     </div>
+                    ${hasExtendedFeatures(ext) ? `
+                    <div class="va-extended-metrics">
+                        ${ext.articulationRate ? `<div class="va-extended-metric"><strong>Articulation:</strong> ${Math.round(ext.articulationRate)} wpm</div>` : ''}
+                        ${ext.mlu ? `<div class="va-extended-metric"><strong>MLU:</strong> ${ext.mlu.toFixed(1)}</div>` : ''}
+                        ${ext.rateDecay ? `<div class="va-extended-metric"><strong>Rate Decay:</strong> ${(ext.rateDecay * 100).toFixed(0)}%</div>` : ''}
+                        ${ext.disfluencyRate ? `<div class="va-extended-metric"><strong>Disfluencies:</strong> ${(ext.disfluencyRate * 100).toFixed(1)}%</div>` : ''}
+                    </div>
+                    ` : ''}
                 </div>
-            `).join('');
+                `;
+            }).join('');
+        }
+
+        function hasExtendedFeatures(ext) {
+            return ext && (ext.articulationRate || ext.mlu || ext.rateDecay || ext.disfluencyRate);
+        }
+
+        async function compareSessions() {
+            const compareSessionId = document.getElementById('vaCompareSessionId').value.trim();
+            if (!compareSessionId) {
+                alert('Please enter a session ID to compare');
+                return;
+            }
+
+            const resultsDiv = document.getElementById('vaComparisonResults');
+            resultsDiv.style.display = 'block';
+            resultsDiv.innerHTML = '<div class="loader"></div>';
+
+            try {
+                const response = await fetch(`${API_URL}?action=compare-sessions`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        sessionId1: compareSessionId,
+                        sessionId2: sessionId
+                    })
+                });
+                const data = await response.json();
+
+                if (data.success && data.comparison) {
+                    displayComparisonResults(data.comparison);
+                } else {
+                    resultsDiv.innerHTML = `<p style="color: var(--text-medium);">${data.message || 'Could not compare sessions'}</p>`;
+                }
+            } catch (error) {
+                console.log('Comparison error:', error);
+                resultsDiv.innerHTML = '<p style="color: var(--warning-color);">Could not compare sessions</p>';
+            }
+        }
+
+        function displayComparisonResults(comparison) {
+            const resultsDiv = document.getElementById('vaComparisonResults');
+            const trendIcon = comparison.trend === 'improvement' ? '↑' :
+                             (comparison.trend === 'decline' ? '↓' : '→');
+            const trendClass = `va-trend-${comparison.trend}`;
+
+            resultsDiv.innerHTML = `
+                <div class="va-comparison-results">
+                    <div class="va-comparison-trend">
+                        <div>
+                            <strong>Previous:</strong> ${comparison.session1.compositeSignal}
+                        </div>
+                        <span class="va-trend-arrow ${trendClass}">${trendIcon}</span>
+                        <div>
+                            <strong>Current:</strong> ${comparison.session2.compositeSignal}
+                        </div>
+                    </div>
+                    <p style="text-align: center;">
+                        Change: ${comparison.signalChange > 0 ? '+' : ''}${comparison.signalChange}
+                        (${comparison.percentChange > 0 ? '+' : ''}${comparison.percentChange}%)
+                    </p>
+                    <p class="va-comparison-disclaimer">${comparison.disclaimer}</p>
+                </div>
+            `;
         }
 
         function formatTestName(testType) {
             const names = {
                 'memory': 'Memory Test',
+                'moca-memory': 'Memory (Recall)',
                 'fluency': 'Animal Fluency',
                 'letterFluency': 'Letter Fluency',
+                'letter-fluency': 'Letter Fluency',
                 'naming': 'Naming Test',
                 'abstraction': 'Abstraction Test',
-                'repetition': 'Repetition Test'
+                'repetition': 'Repetition Test',
+                'digit-span': 'Digit Span',
+                'orientation': 'Orientation',
+                'serial7': 'Serial 7',
+                'vigilance': 'Vigilance'
             };
             return names[testType] || testType;
         }

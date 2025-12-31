@@ -580,56 +580,51 @@ class CognitiveTestScorer {
     }
 }
 
-// ============= SPEECH FEATURE EXTRACTOR =============
-// Experimental feature for analyzing speech patterns
+// ============= SPEECH FEATURE EXTRACTOR v2.0 =============
+// Enhanced experimental feature for analyzing speech patterns
 // NOTE: This is NOT a diagnostic tool - results are informational only
 class SpeechFeatureExtractor {
+    // Pause thresholds in seconds
+    static PAUSE_SHORT = 0.5;
+    static PAUSE_MEDIUM = 1.5;
+    static PAUSE_LONG = 3.0;
+
     /**
-     * Extract speech features from transcription data
-     * @param {Object} data - Contains transcript, words (with timestamps), duration
-     * @returns {Object} - Extracted features
+     * Extract base speech features from transcription data
      */
     static extractFeatures(data) {
         const { transcript, words = [], duration = 0, recordingDuration = 0 } = data;
 
-        // Basic transcript analysis
         const text = transcript || '';
         const wordArray = text.split(/\s+/).filter(w => w.length > 0);
         const wordCount = wordArray.length;
 
-        // Calculate speech rate (words per minute)
         const durationMinutes = (duration || recordingDuration / 1000) / 60;
         const speechRate = durationMinutes > 0 ? Math.round(wordCount / durationMinutes) : 0;
 
-        // Pause analysis from word timestamps
         let pauseCount = 0;
         let totalPauseDuration = 0;
-        const PAUSE_THRESHOLD = 0.5; // 500ms
 
         if (words && words.length > 1) {
             for (let i = 1; i < words.length; i++) {
                 const gap = words[i].start - words[i - 1].end;
-                if (gap > PAUSE_THRESHOLD) {
+                if (gap > this.PAUSE_SHORT) {
                     pauseCount++;
                     totalPauseDuration += gap;
                 }
             }
         }
 
-        // Response latency (time to first word)
         const responseLatency = words && words.length > 0 ? words[0].start : null;
 
-        // Lexical diversity (unique words / total words)
         const uniqueWords = new Set(wordArray.map(w => w.toLowerCase()));
         const lexicalDiversity = wordCount > 0 ? uniqueWords.size / wordCount : 0;
 
-        // Filler word detection
         const fillerWords = ['um', 'uh', 'er', 'ah', 'like', 'you know', 'eh'];
         const fillerCount = wordArray.filter(w =>
             fillerWords.includes(w.toLowerCase())
         ).length;
 
-        // Repetition detection (consecutive same words)
         let repetitionCount = 0;
         for (let i = 1; i < wordArray.length; i++) {
             if (wordArray[i].toLowerCase() === wordArray[i - 1].toLowerCase()) {
@@ -641,67 +636,589 @@ class SpeechFeatureExtractor {
             wordCount,
             speechRate,
             pauseCount,
-            avgPauseDuration: pauseCount > 0 ? totalPauseDuration / pauseCount : 0,
-            responseLatency,
+            avgPauseDuration: pauseCount > 0 ? Math.round((totalPauseDuration / pauseCount) * 100) / 100 : 0,
+            responseLatency: responseLatency !== null ? Math.round(responseLatency * 100) / 100 : null,
             lexicalDiversity: Math.round(lexicalDiversity * 100) / 100,
             fillerCount,
             repetitionCount,
-            totalDuration: duration || recordingDuration / 1000
+            totalDuration: Math.round((duration || recordingDuration / 1000) * 100) / 100
         };
     }
 
     /**
-     * Generate task-aware interpretation
-     * Different tests have different speech expectations
-     * @param {Object} features - Extracted features
-     * @param {string} testType - Type of test
-     * @returns {Object} - Task-aware interpretation
+     * Calculate articulation rate (WPM excluding pauses)
      */
-    static interpretForTask(features, testType) {
-        // Different expectations per test type
-        const expectations = {
-            fluency: { // Animal/Letter fluency - rapid generation expected
-                context: 'Word generation task',
-                notes: 'Higher speech rate typically expected'
-            },
-            letterFluency: {
-                context: 'Letter-based word generation task',
-                notes: 'Higher speech rate typically expected'
-            },
-            memory: { // Memory recall - pauses may indicate retrieval effort
-                context: 'Delayed recall task',
-                notes: 'Pauses may reflect normal retrieval processes'
-            },
-            repetition: { // Sentence repetition - accuracy over speed
-                context: 'Verbal repetition task',
-                notes: 'Careful, accurate speech expected'
-            },
-            naming: { // Naming - word retrieval
-                context: 'Object naming task',
-                notes: 'Response timing reflects word retrieval'
-            },
-            abstraction: { // Similarity explanation
-                context: 'Verbal reasoning task',
-                notes: 'Pauses may reflect thinking processes'
+    static calculateArticulationRate(words, totalDuration) {
+        if (!words || words.length < 2) return null;
+
+        let phonationTime = 0;
+        words.forEach(w => {
+            if (w.end && w.start) {
+                phonationTime += (w.end - w.start);
             }
+        });
+
+        const phonationMinutes = phonationTime / 60;
+        return phonationMinutes > 0 ? Math.round(words.length / phonationMinutes) : 0;
+    }
+
+    /**
+     * Analyze hesitation patterns - short, medium, long pauses
+     */
+    static analyzeHesitationPatterns(words, totalDuration) {
+        if (!words || words.length < 2) return null;
+
+        let shortPauses = 0, mediumPauses = 0, longPauses = 0;
+        let totalSilence = 0;
+        const pausePositions = [];
+
+        for (let i = 1; i < words.length; i++) {
+            const gap = words[i].start - words[i - 1].end;
+            if (gap > this.PAUSE_SHORT) {
+                const relativePosition = i / words.length;
+                pausePositions.push(relativePosition);
+                totalSilence += gap;
+
+                if (gap >= this.PAUSE_LONG) longPauses++;
+                else if (gap >= this.PAUSE_MEDIUM) mediumPauses++;
+                else shortPauses++;
+            }
+        }
+
+        const avgPausePosition = pausePositions.length > 0
+            ? pausePositions.reduce((a, b) => a + b, 0) / pausePositions.length
+            : 0.5;
+
+        return {
+            shortPauses,
+            mediumPauses,
+            longPauses,
+            pausePositionTendency: Math.round(avgPausePosition * 100) / 100,
+            silenceRatio: totalDuration > 0 ? Math.round((totalSilence / totalDuration) * 100) / 100 : 0
+        };
+    }
+
+    /**
+     * Analyze rate decay - production decline over time (for fluency tests)
+     */
+    static analyzeRateDecay(words, totalDuration) {
+        if (!words || words.length < 6 || totalDuration < 3) return null;
+
+        const thirdDuration = totalDuration / 3;
+        const firstThird = words.filter(w => w.start < thirdDuration);
+        const secondThird = words.filter(w => w.start >= thirdDuration && w.start < thirdDuration * 2);
+        const lastThird = words.filter(w => w.start >= thirdDuration * 2);
+
+        const rateBySegment = [
+            firstThird.length / (thirdDuration / 60),
+            secondThird.length / (thirdDuration / 60),
+            lastThird.length / (thirdDuration / 60)
+        ];
+
+        const decaySlope = (rateBySegment[2] - rateBySegment[0]) / 2;
+
+        return {
+            segmentRates: rateBySegment.map(r => Math.round(r * 10) / 10),
+            decaySlope: Math.round(decaySlope * 100) / 100,
+            decayPattern: decaySlope < -2 ? 'declining' : decaySlope > 2 ? 'increasing' : 'stable'
+        };
+    }
+
+    /**
+     * Analyze inter-word interval variability (rhythm consistency)
+     */
+    static analyzeInterWordVariability(words) {
+        if (!words || words.length < 3) return null;
+
+        const intervals = [];
+        for (let i = 1; i < words.length; i++) {
+            intervals.push(words[i].start - words[i - 1].end);
+        }
+
+        const mean = intervals.reduce((a, b) => a + b, 0) / intervals.length;
+        const variance = intervals.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / intervals.length;
+        const stdDev = Math.sqrt(variance);
+        const coefficientOfVariation = mean > 0 ? stdDev / mean : 0;
+
+        return {
+            meanInterval: Math.round(mean * 1000) / 1000,
+            intervalVariability: Math.round(coefficientOfVariation * 100) / 100,
+            rhythmPattern: coefficientOfVariation < 0.5 ? 'regular' :
+                           coefficientOfVariation < 1.0 ? 'moderate' : 'irregular'
+        };
+    }
+
+    /**
+     * Calculate Mean Length of Utterance (MLU)
+     */
+    static calculateMLU(transcript) {
+        if (!transcript) return null;
+
+        const utterances = transcript
+            .split(/[.!?;]|\s{2,}/)
+            .filter(u => u.trim().length > 0);
+
+        if (utterances.length === 0) return { mlu: 0, utteranceCount: 0 };
+
+        const wordsPerUtterance = utterances.map(u =>
+            u.split(/\s+/).filter(w => w.length > 0).length
+        );
+
+        const mlu = wordsPerUtterance.reduce((a, b) => a + b, 0) / utterances.length;
+
+        return {
+            mlu: Math.round(mlu * 10) / 10,
+            utteranceCount: utterances.length,
+            minUtterance: Math.min(...wordsPerUtterance),
+            maxUtterance: Math.max(...wordsPerUtterance)
+        };
+    }
+
+    /**
+     * Enhanced disfluency detection - fillers, restarts, fragments
+     */
+    static analyzeDisfluencies(transcript) {
+        if (!transcript) return null;
+
+        const text = transcript.toLowerCase();
+        const wordArray = text.split(/\s+/).filter(w => w.length > 0);
+
+        const fillerWords = [
+            'um', 'uh', 'er', 'ah', 'like', 'you know', 'eh', 'hmm',
+            'so', 'well', 'basically', 'actually', 'literally', 'right'
+        ];
+
+        let fillerCount = 0;
+        const fillerDetails = {};
+        fillerWords.forEach(filler => {
+            const regex = new RegExp(`\\b${filler}\\b`, 'gi');
+            const matches = text.match(regex);
+            if (matches) {
+                fillerCount += matches.length;
+                fillerDetails[filler] = matches.length;
+            }
+        });
+
+        // Detect restarts: "I... I mean", "the the"
+        const restartPattern = /\b(\w+)\s*\.{2,3}\s*\1\b|\b(\w+)\s+\2\b/gi;
+        const restarts = (text.match(restartPattern) || []).length;
+
+        // Detect fragments (words ending in hyphen or isolated short)
+        const fragments = wordArray.filter(w =>
+            w.endsWith('-') || (w.length <= 2 && !['a', 'i', 'an', 'is', 'it', 'to', 'of', 'or', 'on', 'in', 'at', 'by', 'no', 'so', 'we', 'he', 'me', 'my', 'up', 'do', 'go', 'if', 'as', 'be'].includes(w))
+        ).length;
+
+        return {
+            fillerCount,
+            fillerDetails,
+            restartCount: restarts,
+            fragmentCount: fragments,
+            disfluencyRate: wordArray.length > 0
+                ? Math.round((fillerCount + restarts + fragments) / wordArray.length * 100) / 100
+                : 0
+        };
+    }
+
+    /**
+     * Estimate POS ratios using word lists (lightweight, no NLP library)
+     */
+    static estimatePOSRatios(transcript) {
+        if (!transcript) return null;
+
+        const words = transcript.toLowerCase().split(/\s+/).filter(w => w.length > 0);
+        if (words.length === 0) return null;
+
+        const functionWords = new Set([
+            // Articles
+            'a', 'an', 'the',
+            // Prepositions
+            'in', 'on', 'at', 'to', 'for', 'with', 'by', 'from', 'of', 'about', 'into', 'through', 'during', 'before', 'after', 'above', 'below', 'between', 'under', 'over',
+            // Pronouns
+            'i', 'you', 'he', 'she', 'it', 'we', 'they', 'me', 'him', 'her', 'us', 'them', 'my', 'your', 'his', 'its', 'our', 'their', 'mine', 'yours', 'hers', 'ours', 'theirs', 'this', 'that', 'these', 'those', 'who', 'which', 'what', 'whom', 'whose',
+            // Conjunctions
+            'and', 'but', 'or', 'nor', 'for', 'yet', 'so', 'because', 'although', 'while', 'if', 'when', 'unless', 'until', 'since',
+            // Auxiliaries
+            'is', 'are', 'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should', 'may', 'might', 'must', 'can', 'shall'
+        ]);
+
+        let functionCount = 0;
+        let contentCount = 0;
+
+        words.forEach(word => {
+            const cleanWord = word.replace(/[^a-z]/g, '');
+            if (!cleanWord) return;
+
+            if (functionWords.has(cleanWord)) {
+                functionCount++;
+            } else {
+                contentCount++;
+            }
+        });
+
+        return {
+            contentRatio: Math.round(contentCount / words.length * 100) / 100,
+            functionRatio: Math.round(functionCount / words.length * 100) / 100,
+            contentToFunction: functionCount > 0 ? Math.round(contentCount / functionCount * 100) / 100 : contentCount
+        };
+    }
+
+    /**
+     * Assess semantic coherence (lightweight - task-specific vocabulary matching)
+     */
+    static assessSemanticCoherence(transcript, testType, language = 'en') {
+        if (!transcript) return null;
+
+        const words = transcript.toLowerCase().split(/\s+/).filter(w => w.length > 0);
+        if (words.length < 3) return { coherenceScore: null, reason: 'insufficient_words' };
+
+        // For fluency tests - measure semantic clustering
+        if (testType === 'fluency') {
+            const animalCategories = {
+                mammals: ['dog', 'cat', 'lion', 'tiger', 'elephant', 'horse', 'cow', 'pig', 'bear', 'wolf', 'fox', 'deer', 'rabbit', 'mouse', 'rat', 'monkey', 'gorilla', 'zebra', 'giraffe', 'hippo', 'rhino', 'sheep', 'goat', 'donkey', 'camel'],
+                birds: ['bird', 'eagle', 'hawk', 'owl', 'parrot', 'chicken', 'duck', 'goose', 'turkey', 'crow', 'sparrow', 'robin', 'penguin', 'flamingo', 'ostrich', 'pigeon'],
+                fish: ['fish', 'shark', 'whale', 'dolphin', 'salmon', 'tuna', 'cod', 'bass', 'trout', 'goldfish'],
+                reptiles: ['snake', 'lizard', 'turtle', 'crocodile', 'alligator', 'gecko', 'iguana'],
+                insects: ['ant', 'bee', 'butterfly', 'spider', 'fly', 'mosquito', 'beetle', 'grasshopper', 'cricket']
+            };
+
+            let currentCategory = null;
+            let switches = 0;
+            let validAnimals = 0;
+            const clusters = [];
+            let currentClusterSize = 0;
+
+            words.forEach(word => {
+                let foundCategory = null;
+                for (const [category, animals] of Object.entries(animalCategories)) {
+                    if (animals.includes(word)) {
+                        foundCategory = category;
+                        validAnimals++;
+                        break;
+                    }
+                }
+
+                if (foundCategory) {
+                    if (currentCategory && foundCategory !== currentCategory) {
+                        switches++;
+                        if (currentClusterSize > 0) clusters.push(currentClusterSize);
+                        currentClusterSize = 1;
+                    } else {
+                        currentClusterSize++;
+                    }
+                    currentCategory = foundCategory;
+                }
+            });
+            if (currentClusterSize > 0) clusters.push(currentClusterSize);
+
+            const avgClusterSize = clusters.length > 0
+                ? clusters.reduce((a, b) => a + b, 0) / clusters.length
+                : 0;
+
+            return {
+                coherenceScore: words.length > 0 ? Math.round(validAnimals / words.length * 100) / 100 : 0,
+                clusteringBehavior: {
+                    averageClusterSize: Math.round(avgClusterSize * 10) / 10,
+                    switchCount: switches,
+                    clusterCount: clusters.length
+                },
+                validItemRatio: words.length > 0 ? Math.round(validAnimals / words.length * 100) / 100 : 0
+            };
+        }
+
+        // For other tests: use lexical diversity as proxy
+        const uniqueWords = new Set(words);
+        return {
+            coherenceScore: Math.round(uniqueWords.size / words.length * 100) / 100,
+            interpretation: 'lexical_diversity_based'
+        };
+    }
+
+    /**
+     * Extract all extended features
+     */
+    static extractExtendedFeatures(data) {
+        const { transcript, words = [], duration = 0, recordingDuration = 0, testType, language = 'en' } = data;
+        const totalDuration = duration || recordingDuration / 1000;
+
+        return {
+            articulationRate: this.calculateArticulationRate(words, totalDuration),
+            hesitationPatterns: this.analyzeHesitationPatterns(words, totalDuration),
+            rateDecay: this.analyzeRateDecay(words, totalDuration),
+            interWordVariability: this.analyzeInterWordVariability(words),
+            mlu: this.calculateMLU(transcript),
+            disfluencies: this.analyzeDisfluencies(transcript),
+            posRatios: this.estimatePOSRatios(transcript),
+            semanticCoherence: this.assessSemanticCoherence(transcript, testType, language)
+        };
+    }
+
+    /**
+     * Generate enhanced task-aware analysis with observations
+     */
+    static generateTaskAwareAnalysis(features, extendedFeatures, testType) {
+        const observations = [];
+
+        const expectations = {
+            fluency: { context: 'Word generation task', notes: 'Rapid item generation expected' },
+            letterFluency: { context: 'Letter-based word generation', notes: 'Rapid generation expected' },
+            memory: { context: 'Delayed recall task', notes: 'Pauses may reflect retrieval effort' },
+            repetition: { context: 'Verbal repetition task', notes: 'Accurate speech expected' },
+            naming: { context: 'Object naming task', notes: 'Response timing reflects retrieval' },
+            abstraction: { context: 'Verbal reasoning task', notes: 'Pauses may reflect thinking' }
         };
 
-        const taskContext = expectations[testType] || {
-            context: 'General speech task',
-            notes: 'Standard speech patterns'
-        };
+        const taskContext = expectations[testType] || { context: 'General speech task', notes: 'Standard patterns' };
+
+        // Generate observations based on features
+        if (extendedFeatures.rateDecay?.decaySlope < -3) {
+            observations.push('Declining production rate observed over time');
+        }
+        if (extendedFeatures.hesitationPatterns?.longPauses > 2) {
+            observations.push('Extended pauses observed');
+        }
+        if (extendedFeatures.hesitationPatterns?.pausePositionTendency > 0.7) {
+            observations.push('Pauses tended toward later in response');
+        }
+        if (features.responseLatency > 2.0) {
+            observations.push('Extended initial response time observed');
+        }
+        if (extendedFeatures.disfluencies?.disfluencyRate > 0.1) {
+            observations.push('Notable disfluency patterns observed');
+        }
+        if (extendedFeatures.semanticCoherence?.clusteringBehavior?.averageClusterSize > 3) {
+            observations.push('Tendency to group related items together');
+        }
+        if (extendedFeatures.interWordVariability?.rhythmPattern === 'irregular') {
+            observations.push('Variable speech rhythm observed');
+        }
+
+        // Task-specific metrics
+        let taskSpecificMetrics = {};
+        switch (testType) {
+            case 'fluency':
+            case 'letterFluency':
+                taskSpecificMetrics = {
+                    productionPattern: extendedFeatures.rateDecay?.decayPattern || 'unknown',
+                    clusteringScore: extendedFeatures.semanticCoherence?.clusteringBehavior?.averageClusterSize || 0,
+                    switchCount: extendedFeatures.semanticCoherence?.clusteringBehavior?.switchCount || 0
+                };
+                break;
+            case 'memory':
+                taskSpecificMetrics = {
+                    retrievalLatency: features.responseLatency,
+                    hesitationLevel: extendedFeatures.hesitationPatterns?.mediumPauses || 0 + (extendedFeatures.hesitationPatterns?.longPauses || 0),
+                    repairBehavior: extendedFeatures.disfluencies?.restartCount || 0
+                };
+                break;
+            case 'repetition':
+                taskSpecificMetrics = {
+                    articulationClarity: extendedFeatures.articulationRate || 0,
+                    rhythmConsistency: extendedFeatures.interWordVariability?.rhythmPattern || 'unknown',
+                    speechPace: features.speechRate < 180 ? 'careful' : 'rapid'
+                };
+                break;
+            case 'naming':
+                taskSpecificMetrics = {
+                    wordRetrievalTime: features.responseLatency,
+                    tipOfTongueIndicators: extendedFeatures.disfluencies?.fragmentCount || 0
+                };
+                break;
+            case 'abstraction':
+                taskSpecificMetrics = {
+                    thinkingPauses: extendedFeatures.hesitationPatterns?.mediumPauses || 0,
+                    responseElaboration: extendedFeatures.mlu?.mlu || 0
+                };
+                break;
+        }
 
         return {
             testType,
             taskContext: taskContext.context,
             notes: taskContext.notes,
-            // Deliberately vague, non-diagnostic language
-            observations: {
-                speechPace: features.speechRate > 0 ? `${features.speechRate} words per minute observed` : 'Not calculated',
-                pausePattern: features.pauseCount > 0 ? `${features.pauseCount} pauses observed` : 'Minimal pauses',
-                wordVariety: `${Math.round(features.lexicalDiversity * 100)}% unique words`
+            observations,
+            taskSpecificMetrics,
+            experimentalNote: 'These patterns are experimental observations, not clinical indicators.'
+        };
+    }
+}
+
+// ============= SPEECH SIGNAL CALCULATOR =============
+// Calculates composite scores from speech features
+class SpeechSignalCalculator {
+    // Reference ranges for normalization
+    static NORMATIVE_RANGES = {
+        speechRate: { min: 100, max: 180 },
+        articulationRate: { min: 150, max: 220 },
+        pauseCount: { min: 0, max: 10 },
+        lexicalDiversity: { min: 0.3, max: 0.9 },
+        responseLatency: { min: 0.3, max: 3.0 },
+        disfluencyRate: { min: 0, max: 0.15 },
+        mlu: { min: 3, max: 12 }
+    };
+
+    // Task importance weights
+    static TASK_IMPORTANCE = {
+        fluency: 1.2,
+        letterFluency: 1.0,
+        memory: 1.3,
+        repetition: 0.9,
+        naming: 0.8,
+        abstraction: 1.0,
+        orientation: 0.7
+    };
+
+    /**
+     * Normalize a feature value to 0-1 scale
+     */
+    static normalizeFeature(value, featureName) {
+        const range = this.NORMATIVE_RANGES[featureName];
+        if (!range || value === null || value === undefined) return null;
+
+        const normalized = (value - range.min) / (range.max - range.min);
+        return Math.max(0, Math.min(1, normalized));
+    }
+
+    /**
+     * Get feature weights for a specific test type
+     */
+    static getTaskWeights(testType) {
+        const weights = {
+            fluency: {
+                speechRate: 0.25,
+                lexicalDiversity: 0.15,
+                pauseCount: 0.15,
+                disfluencyRate: 0.15,
+                rateDecayStability: 0.30
+            },
+            letterFluency: {
+                speechRate: 0.30,
+                pauseCount: 0.20,
+                disfluencyRate: 0.20,
+                rateDecayStability: 0.30
+            },
+            memory: {
+                responseLatency: 0.30,
+                pauseCount: 0.25,
+                lexicalDiversity: 0.20,
+                disfluencyRate: 0.25
+            },
+            repetition: {
+                articulationRate: 0.30,
+                speechRate: 0.25,
+                pauseCount: 0.20,
+                disfluencyRate: 0.25
+            },
+            naming: {
+                responseLatency: 0.35,
+                pauseCount: 0.25,
+                disfluencyRate: 0.20,
+                speechRate: 0.20
+            },
+            abstraction: {
+                mlu: 0.30,
+                pauseCount: 0.25,
+                lexicalDiversity: 0.25,
+                disfluencyRate: 0.20
             }
         };
+
+        return weights[testType] || {
+            speechRate: 0.25,
+            pauseCount: 0.25,
+            lexicalDiversity: 0.25,
+            disfluencyRate: 0.25
+        };
+    }
+
+    /**
+     * Calculate task signal (0-100) from features
+     */
+    static calculateTaskSignal(features, extendedFeatures, testType) {
+        const weights = this.getTaskWeights(testType);
+        let weightedSum = 0;
+        let totalWeight = 0;
+
+        // Map feature names to values
+        const featureValues = {
+            speechRate: features.speechRate,
+            articulationRate: extendedFeatures?.articulationRate,
+            pauseCount: 10 - Math.min(features.pauseCount || 0, 10), // Invert: fewer pauses = better
+            lexicalDiversity: features.lexicalDiversity,
+            responseLatency: features.responseLatency ? (3.0 - Math.min(features.responseLatency, 3.0)) / 3.0 : null, // Invert: faster = better
+            disfluencyRate: extendedFeatures?.disfluencies?.disfluencyRate ? (0.15 - Math.min(extendedFeatures.disfluencies.disfluencyRate, 0.15)) / 0.15 : null, // Invert
+            mlu: extendedFeatures?.mlu?.mlu,
+            rateDecayStability: extendedFeatures?.rateDecay?.decayPattern === 'stable' ? 1 : extendedFeatures?.rateDecay?.decayPattern === 'declining' ? 0.3 : 0.7
+        };
+
+        for (const [feature, weight] of Object.entries(weights)) {
+            let value = featureValues[feature];
+            if (value !== null && value !== undefined) {
+                // Normalize if it's a raw value
+                if (feature === 'speechRate' || feature === 'articulationRate' || feature === 'mlu') {
+                    value = this.normalizeFeature(value, feature);
+                }
+                if (value !== null) {
+                    weightedSum += value * weight;
+                    totalWeight += weight;
+                }
+            }
+        }
+
+        const taskSignal = totalWeight > 0 ? Math.round((weightedSum / totalWeight) * 100) : null;
+        const confidence = totalWeight / Object.keys(weights).length;
+
+        return {
+            taskSignal,
+            confidence: Math.round(confidence * 100) / 100
+        };
+    }
+
+    /**
+     * Calculate session composite from multiple task results
+     */
+    static calculateSessionComposite(taskResults) {
+        if (!taskResults || taskResults.length === 0) return null;
+
+        let weightedSum = 0;
+        let totalWeight = 0;
+        const taskBreakdown = {};
+
+        taskResults.forEach(result => {
+            if (result.taskSignal !== null && result.confidence > 0.3) {
+                const importance = this.TASK_IMPORTANCE[result.testType] || 1.0;
+                const effectiveWeight = importance * result.confidence;
+
+                weightedSum += result.taskSignal * effectiveWeight;
+                totalWeight += effectiveWeight;
+
+                taskBreakdown[result.testType] = {
+                    signal: result.taskSignal,
+                    confidence: result.confidence,
+                    contribution: Math.round(result.taskSignal * effectiveWeight)
+                };
+            }
+        });
+
+        const compositeSignal = totalWeight > 0 ? Math.round(weightedSum / totalWeight) : null;
+
+        return {
+            compositeSignal,
+            tasksIncluded: Object.keys(taskBreakdown).length,
+            taskBreakdown,
+            reliability: Math.round((totalWeight / taskResults.length) * 100) / 100,
+            interpretation: this.interpretCompositeScore(compositeSignal)
+        };
+    }
+
+    /**
+     * Generate non-diagnostic interpretation
+     */
+    static interpretCompositeScore(score) {
+        if (score === null) return 'Insufficient data for pattern analysis';
+        if (score >= 70) return 'Speech patterns within commonly observed ranges';
+        if (score >= 50) return 'Some variation from common patterns observed';
+        if (score >= 30) return 'Notable variation in some speech patterns';
+        return 'Speech patterns showed variation from typical ranges';
     }
 }
 
@@ -1051,20 +1568,17 @@ export default async function handler(req, res) {
 
                 // Update session with consent (if sessions table has these columns)
                 try {
-                    const { error } = await supabase
-                        .from('sessions')
-                        .update({
+                    await supabaseRequest(
+                        `sessions?session_id=eq.${encodeURIComponent(sessionId)}`,
+                        'PATCH',
+                        {
                             voice_analysis_consent: voiceAnalysisConsent,
                             consent_timestamp: new Date().toISOString()
-                        })
-                        .eq('session_id', sessionId);
-
-                    if (error) {
-                        console.log('Consent update note:', error.message);
-                        // Don't fail - columns might not exist yet
-                    }
+                        }
+                    );
                 } catch (e) {
                     console.log('Consent storage note:', e.message);
+                    // Don't fail - columns might not exist yet
                 }
 
                 return res.json({ success: true });
@@ -1084,42 +1598,60 @@ export default async function handler(req, res) {
                     duration = 0
                 } = body;
 
-                // Extract speech features
-                const features = SpeechFeatureExtractor.extractFeatures({
+                const analysisData = {
                     transcript,
                     words,
                     duration,
-                    recordingDuration
-                });
+                    recordingDuration,
+                    testType,
+                    language
+                };
 
-                // Generate task-aware interpretation
-                const interpretation = SpeechFeatureExtractor.interpretForTask(features, testType);
+                // Extract basic speech features
+                const features = SpeechFeatureExtractor.extractFeatures(analysisData);
 
-                // Save to database
+                // Extract extended features (v2.0 enhancement)
+                const extendedFeatures = SpeechFeatureExtractor.extractExtendedFeatures(analysisData);
+
+                // Generate task-aware interpretation with enhanced analysis
+                const interpretation = SpeechFeatureExtractor.generateTaskAwareAnalysis(
+                    features,
+                    extendedFeatures,
+                    testType
+                );
+
+                // Calculate task signal (0-100 score)
+                const taskSignal = SpeechSignalCalculator.calculateTaskSignal(
+                    features,
+                    extendedFeatures,
+                    testType
+                );
+
+                // Save to database with extended features
                 try {
-                    const { error } = await supabase
-                        .from('speech_analysis')
-                        .insert({
-                            session_id: sessionId,
-                            test_type: testType,
-                            features: features,
-                            interpretation: interpretation,
-                            language: language,
-                            created_at: new Date().toISOString()
-                        });
-
-                    if (error) {
-                        console.log('Speech analysis save note:', error.message);
-                        // Table might not exist yet - that's okay
-                    }
+                    await supabaseRequest('speech_analysis', 'POST', {
+                        session_id: sessionId,
+                        test_type: testType,
+                        features: features,
+                        interpretation: interpretation,
+                        language: language,
+                        extended_features: extendedFeatures,
+                        task_signal: taskSignal.signal,
+                        signal_confidence: taskSignal.confidence,
+                        version: '2.0',
+                        created_at: new Date().toISOString()
+                    });
                 } catch (e) {
                     console.log('Speech analysis storage note:', e.message);
+                    // Table might not exist yet or missing columns - that's okay
                 }
 
                 return res.json({
                     success: true,
                     features,
-                    interpretation
+                    extendedFeatures,
+                    interpretation,
+                    taskSignal
                 });
             }
 
@@ -1131,25 +1663,201 @@ export default async function handler(req, res) {
                 }
 
                 try {
-                    const { data, error } = await supabase
-                        .from('speech_analysis')
-                        .select('*')
-                        .eq('session_id', sessionId)
-                        .order('created_at', { ascending: true });
+                    const results = await supabaseRequest(
+                        `speech_analysis?session_id=eq.${encodeURIComponent(sessionId)}&order=created_at.asc`,
+                        'GET'
+                    );
 
-                    if (error) {
-                        console.log('Speech analysis fetch note:', error.message);
-                        return res.json({ success: true, results: [] });
+                    // Also try to fetch composite score if it exists
+                    let composite = null;
+                    try {
+                        const compositeResults = await supabaseRequest(
+                            `session_speech_composite?session_id=eq.${encodeURIComponent(sessionId)}&order=created_at.desc&limit=1`,
+                            'GET'
+                        );
+                        if (compositeResults && compositeResults.length > 0) {
+                            composite = compositeResults[0];
+                        }
+                    } catch (ce) {
+                        // Table might not exist yet
                     }
 
                     return res.json({
                         success: true,
-                        results: data || []
+                        results: results || [],
+                        composite
                     });
                 } catch (e) {
                     console.log('Speech analysis fetch note:', e.message);
-                    return res.json({ success: true, results: [] });
+                    return res.json({ success: true, results: [], composite: null });
                 }
+            }
+
+            case 'calculate-session-composite': {
+                const body = req.body || {};
+                validateRequired(['sessionId'], body);
+
+                const { sessionId } = body;
+
+                // Fetch all speech analysis results for this session
+                let analysisResults = [];
+                try {
+                    analysisResults = await supabaseRequest(
+                        `speech_analysis?session_id=eq.${encodeURIComponent(sessionId)}&order=created_at.asc`,
+                        'GET'
+                    );
+                } catch (e) {
+                    return res.json({
+                        success: false,
+                        error: 'Could not fetch analysis results'
+                    });
+                }
+
+                if (!analysisResults || analysisResults.length === 0) {
+                    return res.json({
+                        success: true,
+                        composite: null,
+                        message: 'No speech analysis data available for this session'
+                    });
+                }
+
+                // Prepare task analyses for composite calculation
+                const taskAnalyses = analysisResults.map(r => ({
+                    testType: r.test_type,
+                    features: r.features || {},
+                    extendedFeatures: r.extended_features || {},
+                    taskSignal: r.task_signal,
+                    confidence: r.signal_confidence
+                }));
+
+                // Calculate session composite
+                const composite = SpeechSignalCalculator.calculateSessionComposite(taskAnalyses);
+
+                // Save composite to database
+                try {
+                    await supabaseRequest('session_speech_composite', 'POST', {
+                        session_id: sessionId,
+                        composite_signal: composite.compositeSignal,
+                        tasks_included: composite.tasksIncluded,
+                        task_breakdown: composite.taskBreakdown,
+                        reliability: composite.reliability,
+                        interpretation: composite.interpretation,
+                        created_at: new Date().toISOString()
+                    });
+                } catch (e) {
+                    console.log('Composite storage note:', e.message);
+                    // Table might not exist yet
+                }
+
+                return res.json({
+                    success: true,
+                    composite
+                });
+            }
+
+            case 'compare-sessions': {
+                const body = req.body || {};
+                validateRequired(['sessionId1', 'sessionId2'], body);
+
+                const { sessionId1, sessionId2 } = body;
+
+                // Fetch composites for both sessions
+                let composite1 = null;
+                let composite2 = null;
+
+                try {
+                    const results1 = await supabaseRequest(
+                        `session_speech_composite?session_id=eq.${encodeURIComponent(sessionId1)}&order=created_at.desc&limit=1`,
+                        'GET'
+                    );
+                    if (results1 && results1.length > 0) {
+                        composite1 = results1[0];
+                    }
+                } catch (e) {
+                    console.log('Fetch composite 1 note:', e.message);
+                }
+
+                try {
+                    const results2 = await supabaseRequest(
+                        `session_speech_composite?session_id=eq.${encodeURIComponent(sessionId2)}&order=created_at.desc&limit=1`,
+                        'GET'
+                    );
+                    if (results2 && results2.length > 0) {
+                        composite2 = results2[0];
+                    }
+                } catch (e) {
+                    console.log('Fetch composite 2 note:', e.message);
+                }
+
+                if (!composite1 || !composite2) {
+                    return res.json({
+                        success: true,
+                        comparison: null,
+                        message: 'One or both sessions do not have composite scores. Complete more voice-enabled tests first.'
+                    });
+                }
+
+                // Calculate comparison
+                const signalChange = composite2.composite_signal - composite1.composite_signal;
+                const percentChange = composite1.composite_signal > 0
+                    ? ((signalChange / composite1.composite_signal) * 100).toFixed(1)
+                    : 0;
+
+                // Determine trend
+                let trend = 'stable';
+                if (signalChange > 5) trend = 'improvement';
+                else if (signalChange < -5) trend = 'decline';
+
+                // Compare task breakdowns
+                const taskComparison = {};
+                const breakdown1 = composite1.task_breakdown || {};
+                const breakdown2 = composite2.task_breakdown || {};
+                const allTasks = new Set([...Object.keys(breakdown1), ...Object.keys(breakdown2)]);
+
+                for (const task of allTasks) {
+                    const signal1 = breakdown1[task]?.signal || null;
+                    const signal2 = breakdown2[task]?.signal || null;
+
+                    if (signal1 !== null && signal2 !== null) {
+                        const change = signal2 - signal1;
+                        taskComparison[task] = {
+                            session1: signal1,
+                            session2: signal2,
+                            change,
+                            trend: change > 3 ? 'improvement' : (change < -3 ? 'decline' : 'stable')
+                        };
+                    } else {
+                        taskComparison[task] = {
+                            session1: signal1,
+                            session2: signal2,
+                            change: null,
+                            trend: 'incomplete'
+                        };
+                    }
+                }
+
+                return res.json({
+                    success: true,
+                    comparison: {
+                        session1: {
+                            id: sessionId1,
+                            compositeSignal: composite1.composite_signal,
+                            tasksIncluded: composite1.tasks_included,
+                            createdAt: composite1.created_at
+                        },
+                        session2: {
+                            id: sessionId2,
+                            compositeSignal: composite2.composite_signal,
+                            tasksIncluded: composite2.tasks_included,
+                            createdAt: composite2.created_at
+                        },
+                        signalChange,
+                        percentChange: parseFloat(percentChange),
+                        trend,
+                        taskComparison,
+                        disclaimer: 'Day-to-day variation is normal. This comparison is informational only and does not indicate any health condition.'
+                    }
+                });
             }
 
             case 'health': {
