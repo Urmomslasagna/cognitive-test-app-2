@@ -710,6 +710,30 @@
             }
         }
 
+        /* Back button for tests */
+        .back-btn {
+            background: none;
+            border: none;
+            color: var(--primary-color);
+            font-size: 1em;
+            cursor: pointer;
+            padding: 8px 12px;
+            margin-bottom: 10px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            border-radius: var(--radius-sm);
+            transition: background-color 0.2s;
+        }
+
+        .back-btn:hover {
+            background: var(--sand);
+        }
+
+        .back-btn:active {
+            background: var(--primary-light);
+        }
+
         /* Voice input styles - prominent & accessible */
         .voice-input-container {
             display: flex;
@@ -1262,10 +1286,11 @@
 
             <!-- Memory Test -->
             <div id="memoryTest" class="test-interface">
+                <button class="back-btn" onclick="returnHome()">← <span data-translate="back-home">Back</span></button>
                 <div class="progress-bar">
                     <div class="progress-fill" id="memoryProgress">0%</div>
                 </div>
-                
+
                 <h2 data-translate="memory-test-header">Memory Test</h2>
                 
                 <div id="memoryPhase1" class="test-phase">
@@ -1295,10 +1320,11 @@
 
             <!-- Trail Making Test -->
             <div id="trailTest" class="test-interface">
+                <button class="back-btn" onclick="returnHome()">← <span data-translate="back-home">Back</span></button>
                 <div class="progress-bar">
                     <div class="progress-fill" id="trailProgress">0%</div>
                 </div>
-                
+
                 <h2 data-translate="trail-test-header">Trail Making Test</h2>
                 
                 <div id="trailPhase1" class="test-phase">
@@ -1352,6 +1378,7 @@
 
             <!-- Fluency Test -->
             <div id="fluencyTest" class="test-interface">
+                <button class="back-btn" onclick="returnHome()">← <span data-translate="back-home">Back</span></button>
                 <div class="progress-bar">
                     <div class="progress-fill" id="fluencyProgress">0%</div>
                 </div>
@@ -1390,6 +1417,7 @@
 
             <!-- Orientation Test -->
             <div id="orientationTest" class="test-interface">
+                <button class="back-btn" onclick="returnHome()">← <span data-translate="back-home">Back</span></button>
                 <div class="progress-bar">
                     <div class="progress-fill" id="orientationProgress">0%</div>
                 </div>
@@ -1437,6 +1465,7 @@
 
             <!-- Naming Test -->
             <div id="namingTest" class="test-interface">
+                <button class="back-btn" onclick="returnHome()">← <span data-translate="back-home">Back</span></button>
                 <div class="progress-bar">
                     <div class="progress-fill" id="namingProgress">0%</div>
                 </div>
@@ -1484,6 +1513,7 @@
 
             <!-- Digit Span Test -->
             <div id="digitSpanTest" class="test-interface">
+                <button class="back-btn" onclick="returnHome()">← <span data-translate="back-home">Back</span></button>
                 <div class="progress-bar">
                     <div class="progress-fill" id="digitSpanProgress">0%</div>
                 </div>
@@ -1514,6 +1544,7 @@
 
             <!-- Serial 7 Test -->
             <div id="serial7Test" class="test-interface">
+                <button class="back-btn" onclick="returnHome()">← <span data-translate="back-home">Back</span></button>
                 <div class="progress-bar">
                     <div class="progress-fill" id="serial7Progress">0%</div>
                 </div>
@@ -1557,6 +1588,7 @@
 
             <!-- Vigilance Test -->
             <div id="vigilanceTest" class="test-interface">
+                <button class="back-btn" onclick="returnHome()">← <span data-translate="back-home">Back</span></button>
                 <div class="progress-bar">
                     <div class="progress-fill" id="vigilanceProgress">0%</div>
                 </div>
@@ -1583,6 +1615,7 @@
 
             <!-- Abstraction Test -->
             <div id="abstractionTest" class="test-interface">
+                <button class="back-btn" onclick="returnHome()">← <span data-translate="back-home">Back</span></button>
                 <div class="progress-bar">
                     <div class="progress-fill" id="abstractionProgress">0%</div>
                 </div>
@@ -1620,6 +1653,7 @@
 
             <!-- Repetition Test -->
             <div id="repetitionTest" class="test-interface">
+                <button class="back-btn" onclick="returnHome()">← <span data-translate="back-home">Back</span></button>
                 <div class="progress-bar">
                     <div class="progress-fill" id="repetitionProgress">0%</div>
                 </div>
@@ -1657,6 +1691,7 @@
 
             <!-- Letter Fluency Test -->
             <div id="letterFluencyTest" class="test-interface">
+                <button class="back-btn" onclick="returnHome()">← <span data-translate="back-home">Back</span></button>
                 <div class="progress-bar">
                     <div class="progress-fill" id="letterFluencyProgress">0%</div>
                 </div>
@@ -3029,10 +3064,13 @@
 
             // Try to fetch analysis data
             try {
+                console.log('Fetching speech analysis for session:', sessionId);
                 const response = await fetch(`${API_URL}?action=get-speech-analysis&sessionId=${sessionId}`);
                 const data = await response.json();
+                console.log('Speech analysis response:', data);
 
                 if (data.success && data.results && data.results.length > 0) {
+                    console.log('Found', data.results.length, 'speech analysis results');
                     displaySpeechAnalysisResults(data.results, data.composite);
 
                     // If no composite exists, calculate it now
@@ -3041,6 +3079,7 @@
                     }
                 } else {
                     // Show empty state
+                    console.log('No speech analysis results found for this session');
                     document.getElementById('vaEmptyState').style.display = 'block';
                 }
             } catch (error) {
@@ -3048,7 +3087,7 @@
                 document.getElementById('vaEmptyState').style.display = 'block';
             }
 
-            applyTranslations();
+            updateLanguage();
         }
 
         async function calculateAndDisplayComposite() {
@@ -3081,7 +3120,8 @@
         function displaySpeechAnalysisResults(results, composite) {
             const lang = translations[currentLang];
 
-            // Show main sections
+            // Hide empty state, show main sections
+            document.getElementById('vaEmptyState').style.display = 'none';
             document.getElementById('vaSummary').style.display = 'block';
             document.getElementById('vaTestBreakdown').style.display = 'block';
             document.getElementById('vaComparisonSection').style.display = 'block';
@@ -3091,12 +3131,33 @@
                 displayCompositeScore(composite);
             }
 
-            // Collect all patterns/observations from results
+            // Collect all patterns/observations from results (more forgiving parsing)
             const allPatterns = [];
             results.forEach(r => {
-                if (r.interpretation && r.interpretation.observations) {
-                    r.interpretation.observations.forEach(obs => {
-                        if (!allPatterns.includes(obs)) {
+                if (r.interpretation) {
+                    // Handle observations as array, object with values, or string
+                    let observations = [];
+                    if (Array.isArray(r.interpretation.observations)) {
+                        observations = r.interpretation.observations;
+                    } else if (r.interpretation.observations && typeof r.interpretation.observations === 'object') {
+                        observations = Object.values(r.interpretation.observations);
+                    } else if (typeof r.interpretation.observations === 'string') {
+                        observations = [r.interpretation.observations];
+                    }
+
+                    // Also check for patterns, notes, or other similar fields
+                    if (Array.isArray(r.interpretation.patterns)) {
+                        observations = observations.concat(r.interpretation.patterns);
+                    }
+                    if (r.interpretation.note) {
+                        observations.push(r.interpretation.note);
+                    }
+                    if (r.interpretation.summary) {
+                        observations.push(r.interpretation.summary);
+                    }
+
+                    observations.forEach(obs => {
+                        if (obs && typeof obs === 'string' && !allPatterns.includes(obs)) {
                             allPatterns.push(obs);
                         }
                     });
