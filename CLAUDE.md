@@ -72,8 +72,11 @@ All endpoints use `/api/supabase-api?action=ACTION_NAME`
 | `save-moca` | POST | Save MoCA session results |
 | `get-results` | GET | Get results for session |
 | `get-moca` | GET | Get MoCA history |
-| `transcribe` | POST | Whisper speech-to-text |
+| `transcribe` | POST | Whisper speech-to-text (supports verboseOutput for word timestamps) |
 | `health` | GET | Health check |
+| `update-session-consent` | POST | Store voice analysis consent |
+| `analyze-speech` | POST | Extract speech features and save |
+| `get-speech-analysis` | GET | Retrieve speech analysis for session |
 
 ## Code Structure
 
@@ -85,7 +88,8 @@ All endpoints use `/api/supabase-api?action=ACTION_NAME`
 
 ### API ([api/supabase-api.js](api/supabase-api.js))
 - **CognitiveTestScorer class**: Lines 5-580 (all scoring algorithms)
-- **Handler function**: Lines 580-920 (API routing)
+- **SpeechFeatureExtractor class**: Lines 583-705 (experimental speech analysis)
+- **Handler function**: Lines 708-1170 (API routing)
 
 ### Scoring Algorithms (in api/supabase-api.js)
 | Method | MoCA Points | Pass Threshold |
@@ -157,3 +161,53 @@ Total score: 26 points (excludes clock drawing which requires manual evaluation)
 - Normal: ≥26
 - Possible cognitive impairment: <26
 - Education adjustment: +1 point if ≤12 years education
+
+## Experimental Voice Analysis Feature
+
+An **optional, experimental** speech pattern analysis feature that analyzes speech from test recordings.
+
+**CRITICAL: NOT a diagnostic tool** - Results are informational only. Avoids medical terminology.
+
+### User Flow
+1. User clicks "Speech Patterns" tile on home screen (marked "Experimental")
+2. Consent screen shown with disclaimers about limitations
+3. If consented, dashboard shows aggregated speech patterns
+4. Analysis runs automatically after each voice-enabled test
+
+### Features Extracted
+- Speech rate (words per minute)
+- Pause count and duration
+- Response latency (time to first word)
+- Lexical diversity (unique/total words ratio)
+- Filler word count
+- Repetition detection
+
+### API Endpoints (Speech Analysis)
+| Action | Method | Description |
+|--------|--------|-------------|
+| `update-session-consent` | POST | Store voice analysis consent |
+| `analyze-speech` | POST | Extract features and save analysis |
+| `get-speech-analysis` | GET | Retrieve analysis for session |
+
+### Database Schema (Additional)
+```sql
+-- Add to sessions table
+ALTER TABLE sessions ADD COLUMN voice_analysis_consent BOOLEAN DEFAULT FALSE;
+ALTER TABLE sessions ADD COLUMN consent_timestamp TIMESTAMP;
+
+-- New speech analysis table
+CREATE TABLE speech_analysis (
+    id SERIAL PRIMARY KEY,
+    session_id VARCHAR(100) NOT NULL,
+    test_type VARCHAR(50) NOT NULL,
+    features JSONB NOT NULL,
+    interpretation JSONB,
+    language VARCHAR(10) DEFAULT 'en',
+    created_at TIMESTAMP DEFAULT NOW()
+);
+```
+
+### Key Files
+- `SpeechFeatureExtractor` class in [api/supabase-api.js](api/supabase-api.js)
+- Consent/Dashboard UI in [public/index.html](public/index.html)
+- Translations: 45+ keys in EN/ES/ZH for voice analysis feature

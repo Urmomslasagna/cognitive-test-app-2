@@ -580,6 +580,131 @@ class CognitiveTestScorer {
     }
 }
 
+// ============= SPEECH FEATURE EXTRACTOR =============
+// Experimental feature for analyzing speech patterns
+// NOTE: This is NOT a diagnostic tool - results are informational only
+class SpeechFeatureExtractor {
+    /**
+     * Extract speech features from transcription data
+     * @param {Object} data - Contains transcript, words (with timestamps), duration
+     * @returns {Object} - Extracted features
+     */
+    static extractFeatures(data) {
+        const { transcript, words = [], duration = 0, recordingDuration = 0 } = data;
+
+        // Basic transcript analysis
+        const text = transcript || '';
+        const wordArray = text.split(/\s+/).filter(w => w.length > 0);
+        const wordCount = wordArray.length;
+
+        // Calculate speech rate (words per minute)
+        const durationMinutes = (duration || recordingDuration / 1000) / 60;
+        const speechRate = durationMinutes > 0 ? Math.round(wordCount / durationMinutes) : 0;
+
+        // Pause analysis from word timestamps
+        let pauseCount = 0;
+        let totalPauseDuration = 0;
+        const PAUSE_THRESHOLD = 0.5; // 500ms
+
+        if (words && words.length > 1) {
+            for (let i = 1; i < words.length; i++) {
+                const gap = words[i].start - words[i - 1].end;
+                if (gap > PAUSE_THRESHOLD) {
+                    pauseCount++;
+                    totalPauseDuration += gap;
+                }
+            }
+        }
+
+        // Response latency (time to first word)
+        const responseLatency = words && words.length > 0 ? words[0].start : null;
+
+        // Lexical diversity (unique words / total words)
+        const uniqueWords = new Set(wordArray.map(w => w.toLowerCase()));
+        const lexicalDiversity = wordCount > 0 ? uniqueWords.size / wordCount : 0;
+
+        // Filler word detection
+        const fillerWords = ['um', 'uh', 'er', 'ah', 'like', 'you know', 'eh'];
+        const fillerCount = wordArray.filter(w =>
+            fillerWords.includes(w.toLowerCase())
+        ).length;
+
+        // Repetition detection (consecutive same words)
+        let repetitionCount = 0;
+        for (let i = 1; i < wordArray.length; i++) {
+            if (wordArray[i].toLowerCase() === wordArray[i - 1].toLowerCase()) {
+                repetitionCount++;
+            }
+        }
+
+        return {
+            wordCount,
+            speechRate,
+            pauseCount,
+            avgPauseDuration: pauseCount > 0 ? totalPauseDuration / pauseCount : 0,
+            responseLatency,
+            lexicalDiversity: Math.round(lexicalDiversity * 100) / 100,
+            fillerCount,
+            repetitionCount,
+            totalDuration: duration || recordingDuration / 1000
+        };
+    }
+
+    /**
+     * Generate task-aware interpretation
+     * Different tests have different speech expectations
+     * @param {Object} features - Extracted features
+     * @param {string} testType - Type of test
+     * @returns {Object} - Task-aware interpretation
+     */
+    static interpretForTask(features, testType) {
+        // Different expectations per test type
+        const expectations = {
+            fluency: { // Animal/Letter fluency - rapid generation expected
+                context: 'Word generation task',
+                notes: 'Higher speech rate typically expected'
+            },
+            letterFluency: {
+                context: 'Letter-based word generation task',
+                notes: 'Higher speech rate typically expected'
+            },
+            memory: { // Memory recall - pauses may indicate retrieval effort
+                context: 'Delayed recall task',
+                notes: 'Pauses may reflect normal retrieval processes'
+            },
+            repetition: { // Sentence repetition - accuracy over speed
+                context: 'Verbal repetition task',
+                notes: 'Careful, accurate speech expected'
+            },
+            naming: { // Naming - word retrieval
+                context: 'Object naming task',
+                notes: 'Response timing reflects word retrieval'
+            },
+            abstraction: { // Similarity explanation
+                context: 'Verbal reasoning task',
+                notes: 'Pauses may reflect thinking processes'
+            }
+        };
+
+        const taskContext = expectations[testType] || {
+            context: 'General speech task',
+            notes: 'Standard speech patterns'
+        };
+
+        return {
+            testType,
+            taskContext: taskContext.context,
+            notes: taskContext.notes,
+            // Deliberately vague, non-diagnostic language
+            observations: {
+                speechPace: features.speechRate > 0 ? `${features.speechRate} words per minute observed` : 'Not calculated',
+                pausePattern: features.pauseCount > 0 ? `${features.pauseCount} pauses observed` : 'Minimal pauses',
+                wordVariety: `${Math.round(features.lexicalDiversity * 100)}% unique words`
+            }
+        };
+    }
+}
+
 // ============= MAIN HANDLER =============
 export default async function handler(req, res) {
     // CORS - Allow specific origins or all for development
@@ -863,7 +988,7 @@ export default async function handler(req, res) {
                 const body = req.body || {};
                 validateRequired(['audio'], body);
 
-                const { audio, language = 'en' } = body;
+                const { audio, language = 'en', verboseOutput = false } = body;
 
                 // Decode base64 audio
                 const audioBuffer = Buffer.from(audio, 'base64');
@@ -875,6 +1000,12 @@ export default async function handler(req, res) {
                 formData.append('model', 'whisper-1');
                 formData.append('language', language);
 
+                // Request verbose output with word timestamps if needed for speech analysis
+                if (verboseOutput) {
+                    formData.append('response_format', 'verbose_json');
+                    formData.append('timestamp_granularities[]', 'word');
+                }
+
                 const response = await fetch('https://api.openai.com/v1/audio/transcriptions', {
                     method: 'POST',
                     headers: {
@@ -884,17 +1015,141 @@ export default async function handler(req, res) {
                 });
 
                 if (!response.ok) {
-                    const error = await response.text();
+                    const errorText = await response.text();
+                    console.error('Whisper API error:', errorText);
                     throw new Error('Transcription failed');
                 }
 
                 const result = await response.json();
+
+                // Return enhanced response if verbose output was requested
+                if (verboseOutput) {
+                    return res.json({
+                        success: true,
+                        transcript: result.text,
+                        language: result.language || language,
+                        duration: result.duration || 0,
+                        words: result.words || [] // Word-level timestamps
+                    });
+                }
 
                 return res.json({
                     success: true,
                     transcript: result.text,
                     language: language
                 });
+            }
+
+            // ============= SPEECH ANALYSIS ENDPOINTS =============
+            // Experimental feature - NOT for diagnostic purposes
+
+            case 'update-session-consent': {
+                const body = req.body || {};
+                validateRequired(['sessionId', 'voiceAnalysisConsent'], body);
+
+                const { sessionId, voiceAnalysisConsent } = body;
+
+                // Update session with consent (if sessions table has these columns)
+                try {
+                    const { error } = await supabase
+                        .from('sessions')
+                        .update({
+                            voice_analysis_consent: voiceAnalysisConsent,
+                            consent_timestamp: new Date().toISOString()
+                        })
+                        .eq('session_id', sessionId);
+
+                    if (error) {
+                        console.log('Consent update note:', error.message);
+                        // Don't fail - columns might not exist yet
+                    }
+                } catch (e) {
+                    console.log('Consent storage note:', e.message);
+                }
+
+                return res.json({ success: true });
+            }
+
+            case 'analyze-speech': {
+                const body = req.body || {};
+                validateRequired(['sessionId', 'testType'], body);
+
+                const {
+                    sessionId,
+                    testType,
+                    language = 'en',
+                    recordingDuration = 0,
+                    transcript = '',
+                    words = [],
+                    duration = 0
+                } = body;
+
+                // Extract speech features
+                const features = SpeechFeatureExtractor.extractFeatures({
+                    transcript,
+                    words,
+                    duration,
+                    recordingDuration
+                });
+
+                // Generate task-aware interpretation
+                const interpretation = SpeechFeatureExtractor.interpretForTask(features, testType);
+
+                // Save to database
+                try {
+                    const { error } = await supabase
+                        .from('speech_analysis')
+                        .insert({
+                            session_id: sessionId,
+                            test_type: testType,
+                            features: features,
+                            interpretation: interpretation,
+                            language: language,
+                            created_at: new Date().toISOString()
+                        });
+
+                    if (error) {
+                        console.log('Speech analysis save note:', error.message);
+                        // Table might not exist yet - that's okay
+                    }
+                } catch (e) {
+                    console.log('Speech analysis storage note:', e.message);
+                }
+
+                return res.json({
+                    success: true,
+                    features,
+                    interpretation
+                });
+            }
+
+            case 'get-speech-analysis': {
+                const sessionId = req.query.sessionId || (req.body && req.body.sessionId);
+
+                if (!sessionId) {
+                    return res.status(400).json({ error: 'sessionId required' });
+                }
+
+                try {
+                    const { data, error } = await supabase
+                        .from('speech_analysis')
+                        .select('*')
+                        .eq('session_id', sessionId)
+                        .order('created_at', { ascending: true });
+
+                    if (error) {
+                        console.log('Speech analysis fetch note:', error.message);
+                        return res.json({ success: true, results: [] });
+                    }
+
+                    return res.json({
+                        success: true,
+                        results: data || []
+                    });
+                } catch (e) {
+                    console.log('Speech analysis fetch note:', e.message);
+                    return res.json({ success: true, results: [] });
+                }
             }
 
             case 'health': {

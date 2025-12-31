@@ -787,6 +787,123 @@
             font-size: 1.05em;
             line-height: 1.6;
         }
+
+        /* Experimental tile styling */
+        .experimental-card {
+            border-left-color: var(--warning-color);
+            background: #FFFBF5;
+            position: relative;
+        }
+
+        .experimental-card:hover {
+            border-color: var(--warning-color);
+        }
+
+        .experimental-badge {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: var(--warning-color);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.72em;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+        }
+
+        /* Consent section styling */
+        .consent-section {
+            background: var(--sand);
+            border-radius: var(--radius-md);
+            padding: var(--spacing-base);
+            margin: var(--spacing-base) 0;
+        }
+
+        .consent-section h3 {
+            color: var(--primary-dark);
+            font-size: 1.05em;
+            margin-bottom: 10px;
+        }
+
+        .consent-section ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+
+        .consent-section li {
+            color: var(--text-medium);
+            margin: 8px 0;
+            line-height: 1.5;
+        }
+
+        /* Voice analysis dashboard styling */
+        .va-summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            margin: var(--spacing-base) 0;
+        }
+
+        .va-stat-card {
+            background: var(--sand);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            text-align: center;
+        }
+
+        .va-stat-card strong {
+            display: block;
+            color: var(--text-dark);
+            font-size: 1.1em;
+            margin-bottom: 4px;
+        }
+
+        .va-stat-card span {
+            color: var(--primary-color);
+            font-size: 1.4em;
+            font-weight: 700;
+        }
+
+        .va-test-card {
+            background: var(--warm-white);
+            border: 1px solid var(--sand);
+            border-radius: var(--radius-md);
+            padding: var(--spacing-base);
+            margin: 12px 0;
+        }
+
+        .va-test-card h4 {
+            color: var(--primary-dark);
+            margin-bottom: 8px;
+        }
+
+        .va-pattern-item {
+            background: var(--sand);
+            padding: 10px 14px;
+            border-radius: var(--radius-sm);
+            margin: 8px 0;
+            font-size: 0.95em;
+        }
+
+        .va-empty-state {
+            text-align: center;
+            padding: var(--spacing-large);
+            background: var(--sand);
+            border-radius: var(--radius-md);
+        }
+
+        .va-empty-state ul {
+            list-style: none;
+            padding: 0;
+            margin: var(--spacing-base) 0;
+        }
+
+        .va-empty-state li {
+            padding: 8px 0;
+            color: var(--text-medium);
+        }
     </style>
 </head>
 <body>
@@ -896,6 +1013,13 @@
                         <h3 data-translate="letter-fluency-test-title">Letter Fluency Test</h3>
                         <p data-translate="letter-fluency-test-desc">Name words starting with F</p>
                         <p class="test-duration" data-translate="letter-fluency-test-duration">1 minute</p>
+                    </div>
+
+                    <div class="test-card experimental-card" onclick="showVoiceAnalysisIntro()">
+                        <span class="experimental-badge" data-translate="experimental-badge">Experimental</span>
+                        <h3 data-translate="voice-analysis-title">Speech Patterns</h3>
+                        <p data-translate="voice-analysis-desc">View experimental speech pattern insights from your tests</p>
+                        <p class="test-duration" data-translate="voice-analysis-duration">Research Preview</p>
                     </div>
                 </div>
 
@@ -1338,6 +1462,111 @@
                 </div>
             </div>
 
+            <!-- Voice Analysis Consent Screen -->
+            <div id="voiceAnalysisConsent" class="test-interface" style="display: none;">
+                <div class="va-disclaimer-box" style="margin-bottom: 20px;">
+                    <span class="experimental-badge" data-translate="experimental-badge">Experimental</span>
+                    <h2 data-translate="va-consent-title">Speech Pattern Analysis</h2>
+                </div>
+
+                <div class="consent-section">
+                    <h3 data-translate="va-experimental-notice">Research Feature</h3>
+                    <p data-translate="va-experimental-desc">This is an experimental feature that analyzes speech patterns from your test recordings. Results are for informational purposes only.</p>
+                </div>
+
+                <div class="consent-section">
+                    <h3 data-translate="va-what-analyzed">What We Analyze</h3>
+                    <ul class="consent-list">
+                        <li data-translate="va-analyze-1">Speech rate (words per minute)</li>
+                        <li data-translate="va-analyze-2">Pauses between words</li>
+                        <li data-translate="va-analyze-3">Response timing</li>
+                        <li data-translate="va-analyze-4">Word variety in your responses</li>
+                    </ul>
+                </div>
+
+                <div class="consent-section">
+                    <h3 data-translate="va-what-not">Important Limitations</h3>
+                    <ul class="consent-list">
+                        <li data-translate="va-limit-1">This is NOT a medical assessment</li>
+                        <li data-translate="va-limit-2">Results do NOT indicate any health condition</li>
+                        <li data-translate="va-limit-3">This feature is experimental and for research only</li>
+                        <li data-translate="va-limit-4">Always consult healthcare professionals for medical advice</li>
+                    </ul>
+                </div>
+
+                <div class="consent-section">
+                    <h3 data-translate="va-privacy">Your Privacy</h3>
+                    <ul class="consent-list">
+                        <li data-translate="va-privacy-1">Audio is processed then immediately discarded</li>
+                        <li data-translate="va-privacy-2">Only anonymous patterns are saved</li>
+                        <li data-translate="va-privacy-3">No personally identifiable information is collected</li>
+                    </ul>
+                </div>
+
+                <div class="button-group" style="margin-top: 25px;">
+                    <button class="button button-secondary" onclick="declineVoiceAnalysis()">
+                        <span data-translate="va-decline">No Thanks</span>
+                    </button>
+                    <button class="button button-primary" onclick="acceptVoiceAnalysis()">
+                        <span data-translate="va-accept">I Understand, Continue</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Voice Analysis Dashboard -->
+            <div id="voiceAnalysisDashboard" class="test-interface" style="display: none;">
+                <div class="va-disclaimer-box">
+                    <span class="experimental-badge" data-translate="experimental-badge">Experimental</span>
+                    <h2 data-translate="va-dashboard-title">Speech Pattern Insights</h2>
+                </div>
+
+                <div class="va-disclaimer-box" style="background: #FFF3CD; border-color: #FFE69C; margin: 15px 0;">
+                    <strong data-translate="va-disclaimer-title">Research Feature - Not Medical Advice</strong>
+                    <p data-translate="va-disclaimer-text" style="margin: 8px 0 0 0; font-size: 0.9em;">These observations reflect natural speech variation and are NOT indicators of any health condition. Consult healthcare professionals for medical concerns.</p>
+                </div>
+
+                <div id="vaContent">
+                    <!-- Content loaded dynamically -->
+                </div>
+
+                <div id="vaEmptyState" class="va-empty-state" style="display: none;">
+                    <h3 data-translate="va-no-data-title">No Speech Data Yet</h3>
+                    <p data-translate="va-no-data-desc">Complete any of these tests using the voice input button:</p>
+                    <ul style="text-align: left; display: inline-block;">
+                        <li>Memory Test (recall phase)</li>
+                        <li>Animal Fluency Test</li>
+                        <li>Letter Fluency Test</li>
+                        <li>Naming Test</li>
+                        <li>Abstraction Test</li>
+                        <li>Repetition Test</li>
+                    </ul>
+                </div>
+
+                <div id="vaSummary" style="display: none;">
+                    <h3 data-translate="va-summary-title">Session Observations</h3>
+                    <p data-translate="va-summary-desc" style="color: var(--text-medium); margin-bottom: 15px;">Patterns observed from your test recordings:</p>
+
+                    <div class="va-summary-grid" id="vaSummaryGrid">
+                        <!-- Stats loaded dynamically -->
+                    </div>
+
+                    <p class="va-summary-note" data-translate="va-summary-note">Note: These values reflect natural variation and are not indicators of any condition.</p>
+                </div>
+
+                <div id="vaTestBreakdown" style="display: none; margin-top: 20px;">
+                    <h3 data-translate="va-breakdown-title">Per-Test Patterns</h3>
+                    <div id="vaTestCards">
+                        <!-- Test cards loaded dynamically -->
+                    </div>
+                </div>
+
+                <p class="va-footer-disclaimer" data-translate="va-footer-disclaimer">For any health concerns, please consult a qualified healthcare professional.</p>
+
+                <button class="button button-primary" onclick="returnHome()" style="margin-top: 20px;">
+                    <span data-translate="back-home">Back to Home</span>
+                </button>
+            </div>
+
             <!-- Results -->
             <div id="resultsSection" class="results-section">
                 <h2 data-translate="results-header">Results</h2>
@@ -1487,7 +1716,47 @@
                 'words-label': 'Words:',
                 'transcribing': 'Transcribing',
                 'mic-error': 'Please allow microphone access to use voice input.',
-                'transcription-failed': 'Transcription failed. Please type your answer.'
+                'transcription-failed': 'Transcription failed. Please type your answer.',
+                // Voice Analysis Feature
+                'experimental-badge': 'Experimental',
+                'voice-analysis-title': 'Speech Patterns',
+                'voice-analysis-desc': 'View experimental speech pattern insights from your tests',
+                'voice-analysis-duration': 'Research Preview',
+                'va-consent-title': 'Speech Pattern Analysis',
+                'va-experimental-notice': 'Research Feature',
+                'va-experimental-desc': 'This is an experimental feature that analyzes speech patterns from your test recordings. Results are for informational purposes only.',
+                'va-what-analyzed': 'What We Analyze',
+                'va-analyze-1': 'Speech rate (words per minute)',
+                'va-analyze-2': 'Pauses between words',
+                'va-analyze-3': 'Response timing',
+                'va-analyze-4': 'Word variety in your responses',
+                'va-what-not': 'Important Limitations',
+                'va-limit-1': 'This is NOT a medical assessment',
+                'va-limit-2': 'Results do NOT indicate any health condition',
+                'va-limit-3': 'This feature is experimental and for research only',
+                'va-limit-4': 'Always consult healthcare professionals for medical advice',
+                'va-privacy': 'Your Privacy',
+                'va-privacy-1': 'Audio is processed then immediately discarded',
+                'va-privacy-2': 'Only anonymous patterns are saved',
+                'va-privacy-3': 'No personally identifiable information is collected',
+                'va-decline': 'No Thanks',
+                'va-accept': 'I Understand, Continue',
+                'va-dashboard-title': 'Speech Pattern Insights',
+                'va-disclaimer-title': 'Research Feature - Not Medical Advice',
+                'va-disclaimer-text': 'These observations reflect natural speech variation and are NOT indicators of any health condition. Consult healthcare professionals for medical concerns.',
+                'va-no-data-title': 'No Speech Data Yet',
+                'va-no-data-desc': 'Complete any of these tests using the voice input button:',
+                'va-summary-title': 'Session Observations',
+                'va-summary-desc': 'Patterns observed from your test recordings:',
+                'va-summary-note': 'Note: These values reflect natural variation and are not indicators of any condition.',
+                'va-breakdown-title': 'Per-Test Patterns',
+                'va-footer-disclaimer': 'For any health concerns, please consult a qualified healthcare professional.',
+                'back-home': 'Back to Home',
+                'va-speech-rate': 'Speech Rate',
+                'va-pauses': 'Pauses',
+                'va-word-variety': 'Word Variety',
+                'va-wpm': 'wpm',
+                'va-total': 'total'
             },
             es: {
                 'title': 'Evaluación Cognitiva',
@@ -1600,7 +1869,47 @@
                 'words-label': 'Palabras:',
                 'transcribing': 'Transcribiendo',
                 'mic-error': 'Por favor permita el acceso al micrófono para usar la entrada de voz.',
-                'transcription-failed': 'Transcripción fallida. Por favor escriba su respuesta.'
+                'transcription-failed': 'Transcripción fallida. Por favor escriba su respuesta.',
+                // Voice Analysis Feature
+                'experimental-badge': 'Experimental',
+                'voice-analysis-title': 'Patrones de Habla',
+                'voice-analysis-desc': 'Ver información experimental sobre patrones de habla de sus pruebas',
+                'voice-analysis-duration': 'Vista Previa de Investigación',
+                'va-consent-title': 'Análisis de Patrones de Habla',
+                'va-experimental-notice': 'Función de Investigación',
+                'va-experimental-desc': 'Esta es una función experimental que analiza patrones de habla de sus grabaciones de prueba. Los resultados son solo informativos.',
+                'va-what-analyzed': 'Lo Que Analizamos',
+                'va-analyze-1': 'Velocidad del habla (palabras por minuto)',
+                'va-analyze-2': 'Pausas entre palabras',
+                'va-analyze-3': 'Tiempo de respuesta',
+                'va-analyze-4': 'Variedad de palabras en sus respuestas',
+                'va-what-not': 'Limitaciones Importantes',
+                'va-limit-1': 'Esto NO es una evaluación médica',
+                'va-limit-2': 'Los resultados NO indican ninguna condición de salud',
+                'va-limit-3': 'Esta función es experimental y solo para investigación',
+                'va-limit-4': 'Siempre consulte a profesionales de salud para consejos médicos',
+                'va-privacy': 'Su Privacidad',
+                'va-privacy-1': 'El audio se procesa y luego se descarta inmediatamente',
+                'va-privacy-2': 'Solo se guardan patrones anónimos',
+                'va-privacy-3': 'No se recopila información personal identificable',
+                'va-decline': 'No Gracias',
+                'va-accept': 'Entiendo, Continuar',
+                'va-dashboard-title': 'Información de Patrones de Habla',
+                'va-disclaimer-title': 'Función de Investigación - No es Consejo Médico',
+                'va-disclaimer-text': 'Estas observaciones reflejan variación natural del habla y NO son indicadores de ninguna condición de salud. Consulte a profesionales de salud para preocupaciones médicas.',
+                'va-no-data-title': 'Sin Datos de Habla Aún',
+                'va-no-data-desc': 'Complete cualquiera de estas pruebas usando el botón de entrada de voz:',
+                'va-summary-title': 'Observaciones de la Sesión',
+                'va-summary-desc': 'Patrones observados de sus grabaciones de prueba:',
+                'va-summary-note': 'Nota: Estos valores reflejan variación natural y no son indicadores de ninguna condición.',
+                'va-breakdown-title': 'Patrones por Prueba',
+                'va-footer-disclaimer': 'Para cualquier preocupación de salud, consulte a un profesional de salud calificado.',
+                'back-home': 'Volver al Inicio',
+                'va-speech-rate': 'Velocidad',
+                'va-pauses': 'Pausas',
+                'va-word-variety': 'Variedad',
+                'va-wpm': 'ppm',
+                'va-total': 'total'
             },
             zh: {
                 'title': '认知健康筛查',
@@ -1713,7 +2022,47 @@
                 'words-label': '词语：',
                 'transcribing': '正在转录',
                 'mic-error': '请允许麦克风访问以使用语音输入。',
-                'transcription-failed': '转录失败。请输入您的答案。'
+                'transcription-failed': '转录失败。请输入您的答案。',
+                // Voice Analysis Feature
+                'experimental-badge': '实验性',
+                'voice-analysis-title': '语音模式',
+                'voice-analysis-desc': '查看测试中实验性语音模式分析',
+                'voice-analysis-duration': '研究预览',
+                'va-consent-title': '语音模式分析',
+                'va-experimental-notice': '研究功能',
+                'va-experimental-desc': '这是一个实验性功能，分析您测试录音中的语音模式。结果仅供参考。',
+                'va-what-analyzed': '我们分析什么',
+                'va-analyze-1': '语速（每分钟词数）',
+                'va-analyze-2': '词语之间的停顿',
+                'va-analyze-3': '反应时间',
+                'va-analyze-4': '回答中的词汇多样性',
+                'va-what-not': '重要限制',
+                'va-limit-1': '这不是医学评估',
+                'va-limit-2': '结果不表明任何健康状况',
+                'va-limit-3': '此功能是实验性的，仅用于研究',
+                'va-limit-4': '请始终咨询医疗专业人员获取医疗建议',
+                'va-privacy': '您的隐私',
+                'va-privacy-1': '音频处理后立即删除',
+                'va-privacy-2': '仅保存匿名模式',
+                'va-privacy-3': '不收集个人身份信息',
+                'va-decline': '不，谢谢',
+                'va-accept': '我理解，继续',
+                'va-dashboard-title': '语音模式分析',
+                'va-disclaimer-title': '研究功能 - 非医疗建议',
+                'va-disclaimer-text': '这些观察反映了自然语音变化，不是任何健康状况的指标。如有医疗问题，请咨询医疗专业人员。',
+                'va-no-data-title': '暂无语音数据',
+                'va-no-data-desc': '使用语音输入按钮完成以下任何测试：',
+                'va-summary-title': '会话观察',
+                'va-summary-desc': '从您的测试录音中观察到的模式：',
+                'va-summary-note': '注意：这些数值反映自然变化，不是任何状况的指标。',
+                'va-breakdown-title': '每项测试的模式',
+                'va-footer-disclaimer': '如有任何健康问题，请咨询合格的医疗专业人员。',
+                'back-home': '返回主页',
+                'va-speech-rate': '语速',
+                'va-pauses': '停顿',
+                'va-word-variety': '词汇多样性',
+                'va-wpm': '词/分',
+                'va-total': '总计'
             }
         };
         
@@ -2316,10 +2665,165 @@
             document.querySelectorAll('.test-interface').forEach(test => {
                 test.classList.remove('active');
             });
+            // Also hide voice analysis screens
+            document.getElementById('voiceAnalysisConsent').style.display = 'none';
+            document.getElementById('voiceAnalysisDashboard').style.display = 'none';
             document.getElementById('homeScreen').style.display = 'block';
             testResults = {};
         }
-        
+
+        // ========== VOICE ANALYSIS FUNCTIONS ==========
+
+        // Storage for speech analysis data during session
+        let speechAnalysisData = [];
+        let recordingMetadata = {};
+
+        function showVoiceAnalysisIntro() {
+            // Check if user has already consented
+            const hasConsent = localStorage.getItem('voiceAnalysisConsent') === 'true';
+
+            document.getElementById('homeScreen').style.display = 'none';
+
+            if (hasConsent) {
+                // Show dashboard directly
+                showVoiceAnalysisDashboard();
+            } else {
+                // Show consent screen
+                document.getElementById('voiceAnalysisConsent').style.display = 'block';
+                applyTranslations();
+            }
+        }
+
+        function declineVoiceAnalysis() {
+            returnHome();
+        }
+
+        function acceptVoiceAnalysis() {
+            // Store consent
+            localStorage.setItem('voiceAnalysisConsent', 'true');
+
+            // Hide consent, show dashboard
+            document.getElementById('voiceAnalysisConsent').style.display = 'none';
+            showVoiceAnalysisDashboard();
+
+            // Also update session in database if possible
+            updateSessionConsent();
+        }
+
+        async function updateSessionConsent() {
+            try {
+                await fetch(`${API_URL}?action=update-session-consent`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        sessionId: sessionId,
+                        voiceAnalysisConsent: true
+                    })
+                });
+            } catch (error) {
+                console.log('Could not update session consent:', error);
+            }
+        }
+
+        async function showVoiceAnalysisDashboard() {
+            const dashboard = document.getElementById('voiceAnalysisDashboard');
+            dashboard.style.display = 'block';
+
+            // Try to fetch analysis data
+            try {
+                const response = await fetch(`${API_URL}?action=get-speech-analysis&sessionId=${sessionId}`);
+                const data = await response.json();
+
+                if (data.success && data.results && data.results.length > 0) {
+                    displaySpeechAnalysisResults(data.results);
+                } else {
+                    // Show empty state
+                    document.getElementById('vaEmptyState').style.display = 'block';
+                    document.getElementById('vaSummary').style.display = 'none';
+                    document.getElementById('vaTestBreakdown').style.display = 'none';
+                }
+            } catch (error) {
+                console.log('Could not fetch speech analysis:', error);
+                // Show empty state on error
+                document.getElementById('vaEmptyState').style.display = 'block';
+                document.getElementById('vaSummary').style.display = 'none';
+                document.getElementById('vaTestBreakdown').style.display = 'none';
+            }
+
+            applyTranslations();
+        }
+
+        function displaySpeechAnalysisResults(results) {
+            const lang = translations[currentLang];
+
+            // Hide empty state, show summary
+            document.getElementById('vaEmptyState').style.display = 'none';
+            document.getElementById('vaSummary').style.display = 'block';
+            document.getElementById('vaTestBreakdown').style.display = 'block';
+
+            // Calculate aggregate stats
+            let totalWpm = 0;
+            let totalPauses = 0;
+            let totalLexicalDiversity = 0;
+            let count = 0;
+
+            results.forEach(r => {
+                if (r.features) {
+                    if (r.features.speechRate) {
+                        totalWpm += r.features.speechRate;
+                        count++;
+                    }
+                    if (r.features.pauseCount) totalPauses += r.features.pauseCount;
+                    if (r.features.lexicalDiversity) totalLexicalDiversity += r.features.lexicalDiversity;
+                }
+            });
+
+            const avgWpm = count > 0 ? Math.round(totalWpm / count) : 0;
+            const avgLexical = count > 0 ? Math.round((totalLexicalDiversity / count) * 100) : 0;
+
+            // Populate summary grid
+            const summaryGrid = document.getElementById('vaSummaryGrid');
+            summaryGrid.innerHTML = `
+                <div class="va-stat-card">
+                    <div class="va-stat-value">${avgWpm}</div>
+                    <div class="va-stat-label">${lang['va-speech-rate'] || 'Speech Rate'} (${lang['va-wpm'] || 'wpm'})</div>
+                </div>
+                <div class="va-stat-card">
+                    <div class="va-stat-value">${totalPauses}</div>
+                    <div class="va-stat-label">${lang['va-pauses'] || 'Pauses'} (${lang['va-total'] || 'total'})</div>
+                </div>
+                <div class="va-stat-card">
+                    <div class="va-stat-value">${avgLexical}%</div>
+                    <div class="va-stat-label">${lang['va-word-variety'] || 'Word Variety'}</div>
+                </div>
+            `;
+
+            // Populate per-test breakdown
+            const testCards = document.getElementById('vaTestCards');
+            testCards.innerHTML = results.map(r => `
+                <div class="va-test-card" style="background: var(--sand); padding: 12px; border-radius: 8px; margin: 10px 0;">
+                    <strong>${formatTestName(r.test_type)}</strong>
+                    <div style="display: flex; gap: 15px; margin-top: 8px; flex-wrap: wrap;">
+                        ${r.features.speechRate ? `<span>${Math.round(r.features.speechRate)} ${lang['va-wpm'] || 'wpm'}</span>` : ''}
+                        ${r.features.pauseCount !== undefined ? `<span>${r.features.pauseCount} ${lang['va-pauses'] || 'pauses'}</span>` : ''}
+                        ${r.features.wordCount ? `<span>${r.features.wordCount} words</span>` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function formatTestName(testType) {
+            const names = {
+                'memory': 'Memory Test',
+                'fluency': 'Animal Fluency',
+                'letterFluency': 'Letter Fluency',
+                'naming': 'Naming Test',
+                'abstraction': 'Abstraction Test',
+                'repetition': 'Repetition Test'
+            };
+            return names[testType] || testType;
+        }
+
         function downloadResults() {
             const date = new Date().toLocaleDateString();
             let text = `Cognitive Health Screening - ${date}\nSession: ${sessionId}\n\n`;
@@ -2903,7 +3407,10 @@
             const input = document.getElementById(inputId);
 
             if (mediaRecorder && mediaRecorder.state === 'recording') {
-                // Stop current recording
+                // Stop current recording - capture end time
+                if (recordingMetadata[inputId]) {
+                    recordingMetadata[inputId].endTime = Date.now();
+                }
                 mediaRecorder.stop();
                 btn.innerHTML = '🎤 <span data-translate="record">Record</span>';
                 btn.classList.remove('recording');
@@ -2916,6 +3423,14 @@
                 currentRecordingStream = stream;
                 currentRecordingInputId = inputId;
                 appendMode = shouldAppend;
+
+                // Capture recording metadata for speech analysis
+                recordingMetadata[inputId] = {
+                    startTime: Date.now(),
+                    endTime: null,
+                    testType: currentTest,
+                    language: currentLang
+                };
 
                 // Try webm first, fall back to mp4 for Safari
                 let mimeType = 'audio/webm';
@@ -2953,6 +3468,7 @@
             const input = document.getElementById(inputId);
             const btn = document.getElementById('voiceBtn_' + inputId);
             const originalValue = input.value;
+            const metadata = recordingMetadata[inputId];
 
             btn.disabled = true;
             btn.innerHTML = '... <span data-translate="transcribing">Transcribing</span>';
@@ -2963,12 +3479,16 @@
                 reader.onloadend = async () => {
                     const base64Audio = reader.result.split(',')[1];
 
+                    // Check if user has consented to speech analysis
+                    const hasConsent = localStorage.getItem('voiceAnalysisConsent') === 'true';
+
                     const response = await fetch(`${API_URL}?action=transcribe`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             audio: base64Audio,
-                            language: currentLang
+                            language: currentLang,
+                            verboseOutput: hasConsent // Request word-level timestamps if consented
                         })
                     });
 
@@ -2985,6 +3505,11 @@
                         }
                         // Trigger input event for fluency tests
                         input.dispatchEvent(new Event('input', { bubbles: true }));
+
+                        // Trigger async speech analysis if consented
+                        if (hasConsent && metadata) {
+                            triggerSpeechAnalysis(base64Audio, metadata, data);
+                        }
                     } else {
                         alert(translations[currentLang]['transcription-failed'] || 'Transcription failed. Please type your answer.');
                     }
@@ -2995,6 +3520,28 @@
                 btn.disabled = false;
                 btn.innerHTML = '🎤 <span data-translate="record">Record</span>';
                 alert(translations[currentLang]['transcription-failed'] || 'Transcription failed. Please type your answer.');
+            }
+        }
+
+        // Trigger async speech analysis (non-blocking)
+        async function triggerSpeechAnalysis(audioBase64, metadata, transcriptionData) {
+            try {
+                // Fire and forget - don't block the UI
+                fetch(`${API_URL}?action=analyze-speech`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        sessionId: sessionId,
+                        testType: metadata.testType,
+                        language: metadata.language,
+                        recordingDuration: metadata.endTime - metadata.startTime,
+                        transcript: transcriptionData.transcript,
+                        words: transcriptionData.words || [], // Word-level timestamps from Whisper
+                        duration: transcriptionData.duration || 0
+                    })
+                }).catch(err => console.log('Speech analysis queued:', err));
+            } catch (error) {
+                console.log('Speech analysis error (non-blocking):', error);
             }
         }
 
