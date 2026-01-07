@@ -734,6 +734,27 @@
             background: var(--primary-light);
         }
 
+        /* Success button */
+        .button-success {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .button-success:hover {
+            background: #218838;
+        }
+
+        /* Pulse animation for submit buttons */
+        .pulse-animation {
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7); }
+            50% { transform: scale(1.02); box-shadow: 0 0 0 10px rgba(40, 167, 69, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); }
+        }
+
         /* Voice input styles - prominent & accessible */
         .voice-input-container {
             display: flex;
@@ -1160,6 +1181,104 @@
         .va-extended-metric strong {
             color: var(--text-dark);
         }
+
+        /* Warning Degree Card */
+        .va-warning-card {
+            background: var(--warm-white);
+            border: 1px solid var(--sand);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-large);
+            margin: var(--spacing-base) 0;
+        }
+
+        .va-warning-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-base);
+        }
+
+        .va-warning-header h3 {
+            color: var(--text-dark);
+            margin: 0;
+        }
+
+        .va-warning-gauge {
+            margin: var(--spacing-base) 0;
+        }
+
+        .va-warning-bar {
+            height: 20px;
+            background: linear-gradient(to right, #28a745 0%, #28a745 30%, #ffc107 30%, #ffc107 60%, #dc3545 60%, #dc3545 100%);
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .va-warning-fill {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 4px;
+            background: var(--text-dark);
+            border-radius: 2px;
+            transition: left 0.5s ease;
+            box-shadow: 0 0 4px rgba(0,0,0,0.5);
+        }
+
+        .va-warning-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 5px;
+            font-size: 0.8em;
+            color: var(--text-light);
+        }
+
+        .va-warning-message {
+            background: var(--sand);
+            padding: 12px;
+            border-radius: var(--radius-sm);
+            margin: var(--spacing-base) 0;
+            color: var(--text-medium);
+        }
+
+        .va-warning-factors {
+            margin: var(--spacing-base) 0;
+            padding: 12px;
+            background: #fff;
+            border-radius: var(--radius-sm);
+        }
+
+        .va-warning-factors ul {
+            margin: 8px 0 0 0;
+            padding-left: 20px;
+        }
+
+        .va-warning-factors li {
+            color: var(--text-medium);
+            font-size: 0.9em;
+            margin: 4px 0;
+        }
+
+        .va-warning-disclaimer {
+            font-size: 0.8em;
+            color: var(--text-light);
+            font-style: italic;
+            margin-top: 12px;
+        }
+
+        .va-warning-low {
+            border-left: 4px solid #28a745;
+        }
+
+        .va-warning-moderate {
+            border-left: 4px solid #ffc107;
+        }
+
+        .va-warning-elevated {
+            border-left: 4px solid #dc3545;
+        }
     </style>
 </head>
 <body>
@@ -1412,6 +1531,10 @@
                     </button>
 
                     <div id="animalList"></div>
+
+                    <button id="fluencySubmitBtn" class="button button-success" onclick="submitFluencyTest()" style="display: none; margin-top: 20px;">
+                        <span data-translate="submit">Submit</span>
+                    </button>
                 </div>
             </div>
 
@@ -1726,6 +1849,10 @@
                     </button>
 
                     <div id="letterWordList" style="margin-top: 15px;"></div>
+
+                    <button id="letterFluencySubmitBtn" class="button button-success" onclick="finishLetterFluencyTest()" style="display: none; margin-top: 20px;">
+                        <span data-translate="submit">Submit</span>
+                    </button>
                 </div>
             </div>
 
@@ -1824,6 +1951,30 @@
                         <span id="vaTasksIncluded">0 tests analyzed</span>
                         <span id="vaReliability">Reliability: --</span>
                     </div>
+                </div>
+
+                <!-- Warning Degree Card (v2.0) -->
+                <div id="vaWarningCard" class="va-warning-card" style="display: none;">
+                    <div class="va-warning-header">
+                        <h3 data-translate="va-warning-title">Speech Pattern Summary</h3>
+                        <span class="experimental-badge-small" data-translate="experimental-badge">Experimental</span>
+                    </div>
+                    <div class="va-warning-gauge">
+                        <div class="va-warning-bar">
+                            <div id="vaWarningFill" class="va-warning-fill"></div>
+                        </div>
+                        <div class="va-warning-labels">
+                            <span>Low</span>
+                            <span>Moderate</span>
+                            <span>Elevated</span>
+                        </div>
+                    </div>
+                    <p id="vaWarningMessage" class="va-warning-message"></p>
+                    <div id="vaWarningFactors" class="va-warning-factors" style="display: none;">
+                        <strong>Contributing factors:</strong>
+                        <ul id="vaWarningFactorsList"></ul>
+                    </div>
+                    <p class="va-warning-disclaimer" data-translate="va-warning-disclaimer">This is NOT a diagnostic indicator. Many factors affect speech including fatigue, stress, or environment.</p>
                 </div>
 
                 <!-- Enhanced: Pattern Observations (v2.0) -->
@@ -2069,7 +2220,9 @@
                 'va-patterns-title': 'Pattern Observations',
                 'va-comparison-title': 'Compare With Previous Session',
                 'va-comparison-desc': 'Enter a previous session ID to compare speech patterns:',
-                'va-compare-btn': 'Compare'
+                'va-compare-btn': 'Compare',
+                'va-warning-title': 'Speech Pattern Summary',
+                'va-warning-disclaimer': 'This is NOT a diagnostic indicator. Many factors affect speech including fatigue, stress, or environment.'
             },
             es: {
                 'title': 'Evaluación Cognitiva',
@@ -2228,7 +2381,9 @@
                 'va-patterns-title': 'Observaciones de Patrones',
                 'va-comparison-title': 'Comparar con Sesión Anterior',
                 'va-comparison-desc': 'Ingrese un ID de sesión anterior para comparar patrones de habla:',
-                'va-compare-btn': 'Comparar'
+                'va-compare-btn': 'Comparar',
+                'va-warning-title': 'Resumen de Patrones de Habla',
+                'va-warning-disclaimer': 'Este NO es un indicador diagnóstico. Muchos factores afectan el habla incluyendo fatiga, estrés o ambiente.'
             },
             zh: {
                 'title': '认知健康筛查',
@@ -2387,7 +2542,9 @@
                 'va-patterns-title': '模式观察',
                 'va-comparison-title': '与之前会话比较',
                 'va-comparison-desc': '输入之前的会话ID以比较语音模式：',
-                'va-compare-btn': '比较'
+                'va-compare-btn': '比较',
+                'va-warning-title': '语音模式总结',
+                'va-warning-disclaimer': '这不是诊断指标。许多因素会影响语音，包括疲劳、压力或环境。'
             }
         };
         
@@ -2892,23 +3049,40 @@
                 timeRemaining--;
                 document.getElementById('fluencyTimer').textContent = timeRemaining;
                 updateProgress('fluencyProgress', ((60 - timeRemaining) / 60) * 100);
-                
+
                 if (timeRemaining <= 0) {
                     clearInterval(fluencyTimer);
-                    input.disabled = true;
-                    submitFluencyTest();
+                    document.getElementById('fluencyTimer').textContent = "Time's up!";
+                    // Show submit button instead of auto-submitting
+                    document.getElementById('fluencySubmitBtn').style.display = 'block';
+                    document.getElementById('fluencySubmitBtn').classList.add('pulse-animation');
                 }
             }, 1000);
         }
-        
+
         async function submitFluencyTest() {
+            // Disable submit button to prevent double submission
+            const submitBtn = document.getElementById('fluencySubmitBtn');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Submitting...';
+            }
+
+            // Stop timer if still running
+            if (fluencyTimer) {
+                clearInterval(fluencyTimer);
+            }
+
+            // Disable input
+            document.getElementById('fluencyInput').disabled = true;
+
             testResults.fluency = {
                 score: fluencyAnimals.length,
                 passed: fluencyAnimals.length >= 11
             };
-            
+
             await saveTestResult('fluency', testResults.fluency);
-            
+
             updateProgress('fluencyProgress', 100);
             setTimeout(() => showResults(), 500);
         }
@@ -3057,6 +3231,7 @@
             // Hide all sections initially
             document.getElementById('vaEmptyState').style.display = 'none';
             document.getElementById('vaCompositeCard').style.display = 'none';
+            document.getElementById('vaWarningCard').style.display = 'none';
             document.getElementById('vaPatterns').style.display = 'none';
             document.getElementById('vaSummary').style.display = 'none';
             document.getElementById('vaTestBreakdown').style.display = 'none';
@@ -3117,6 +3292,162 @@
             document.getElementById('vaReliability').textContent = `Reliability: ${composite.reliability ? (composite.reliability * 100).toFixed(0) + '%' : '--'}`;
         }
 
+        function displayWarningDegree(warningData) {
+            if (!warningData || warningData.degree === null) return;
+
+            const card = document.getElementById('vaWarningCard');
+            card.style.display = 'block';
+
+            // Remove any existing level classes
+            card.classList.remove('va-warning-low', 'va-warning-moderate', 'va-warning-elevated');
+
+            // Add appropriate level class
+            if (warningData.level === 'low') {
+                card.classList.add('va-warning-low');
+            } else if (warningData.level === 'moderate') {
+                card.classList.add('va-warning-moderate');
+            } else if (warningData.level === 'elevated') {
+                card.classList.add('va-warning-elevated');
+            }
+
+            // Position the indicator on the gauge
+            const fill = document.getElementById('vaWarningFill');
+            fill.style.left = `calc(${warningData.degree}% - 2px)`;
+
+            // Set the message
+            document.getElementById('vaWarningMessage').textContent = warningData.message || '';
+
+            // Display contributing factors if any
+            const factorsDiv = document.getElementById('vaWarningFactors');
+            const factorsList = document.getElementById('vaWarningFactorsList');
+
+            if (warningData.factors && warningData.factors.length > 0) {
+                factorsDiv.style.display = 'block';
+                factorsList.innerHTML = warningData.factors.map(f =>
+                    `<li>${formatMetricName(f.metric)}: ${f.value} - ${f.note}</li>`
+                ).join('');
+            } else {
+                factorsDiv.style.display = 'none';
+            }
+        }
+
+        function formatMetricName(metric) {
+            const names = {
+                'speechRate': 'Speech Rate',
+                'pauseCount': 'Pauses',
+                'lexicalDiversity': 'Word Variety',
+                'responseLatency': 'Response Time',
+                'disfluencyRate': 'Disfluencies'
+            };
+            return names[metric] || metric;
+        }
+
+        // Client-side warning degree calculation (mirrors server algorithm)
+        function calculateClientWarningDegree(features, extendedFeatures = {}) {
+            if (!features) return { degree: null, level: 'unknown', factors: [] };
+
+            const factors = [];
+            let totalScore = 0;
+            let totalWeight = 0;
+
+            // Speech rate - important metric (30% weight)
+            if (features.speechRate !== null && features.speechRate !== undefined && features.speechRate > 0) {
+                const rate = features.speechRate;
+                let rateScore = 0;
+                if (rate < 80) rateScore = 80;
+                else if (rate < 100) rateScore = 50;
+                else if (rate < 120) rateScore = 20;
+                else rateScore = 0;
+
+                if (rateScore > 30) factors.push({ metric: 'speechRate', value: rate + ' wpm', note: 'Lower than typical range' });
+                totalScore += rateScore * 0.30;
+                totalWeight += 0.30;
+            }
+
+            // Pause count - REDUCED weight (10%) as pauses can be natural
+            if (features.pauseCount !== null && features.pauseCount !== undefined) {
+                const pauses = features.pauseCount;
+                let pauseScore = 0;
+                if (pauses > 15) pauseScore = 70;
+                else if (pauses > 10) pauseScore = 40;
+                else if (pauses > 5) pauseScore = 15;
+                else pauseScore = 0;
+
+                if (pauseScore > 30) factors.push({ metric: 'pauseCount', value: pauses, note: 'More pauses than typical' });
+                totalScore += pauseScore * 0.10;
+                totalWeight += 0.10;
+            }
+
+            // Lexical diversity - 20% weight
+            if (features.lexicalDiversity !== null && features.lexicalDiversity !== undefined) {
+                const diversity = features.lexicalDiversity;
+                let diversityScore = 0;
+                if (diversity < 0.3) diversityScore = 70;
+                else if (diversity < 0.5) diversityScore = 40;
+                else if (diversity < 0.6) diversityScore = 15;
+                else diversityScore = 0;
+
+                if (diversityScore > 30) factors.push({ metric: 'lexicalDiversity', value: (diversity * 100).toFixed(0) + '%', note: 'Lower word variety' });
+                totalScore += diversityScore * 0.20;
+                totalWeight += 0.20;
+            }
+
+            // Response latency - 25% weight
+            if (features.responseLatency !== null && features.responseLatency !== undefined) {
+                const latency = features.responseLatency;
+                let latencyScore = 0;
+                if (latency > 5) latencyScore = 80;
+                else if (latency > 3) latencyScore = 50;
+                else if (latency > 2) latencyScore = 20;
+                else latencyScore = 0;
+
+                if (latencyScore > 30) factors.push({ metric: 'responseLatency', value: latency.toFixed(1) + 's', note: 'Slower initial response' });
+                totalScore += latencyScore * 0.25;
+                totalWeight += 0.25;
+            }
+
+            // Disfluency rate - 15% weight
+            if (extendedFeatures.disfluencyRate !== null && extendedFeatures.disfluencyRate !== undefined) {
+                const disfluency = extendedFeatures.disfluencyRate;
+                let disfluencyScore = 0;
+                if (disfluency > 0.2) disfluencyScore = 70;
+                else if (disfluency > 0.1) disfluencyScore = 40;
+                else if (disfluency > 0.05) disfluencyScore = 15;
+                else disfluencyScore = 0;
+
+                if (disfluencyScore > 30) factors.push({ metric: 'disfluencyRate', value: (disfluency * 100).toFixed(0) + '%', note: 'Higher disfluency rate' });
+                totalScore += disfluencyScore * 0.15;
+                totalWeight += 0.15;
+            }
+
+            // Calculate final degree
+            const degree = totalWeight > 0 ? Math.round(totalScore / totalWeight) : null;
+
+            // Determine warning level
+            let level = 'unknown';
+            let message = '';
+            if (degree !== null) {
+                if (degree <= 30) {
+                    level = 'low';
+                    message = 'Speech patterns are within commonly observed ranges.';
+                } else if (degree <= 60) {
+                    level = 'moderate';
+                    message = 'Some speech patterns vary from typical ranges. This may reflect natural variation.';
+                } else {
+                    level = 'elevated';
+                    message = 'Speech patterns show notable variation. Consider discussing with a healthcare provider if concerned.';
+                }
+            }
+
+            return {
+                degree,
+                level,
+                message,
+                factors,
+                disclaimer: 'This is an experimental metric and NOT a diagnostic indicator.'
+            };
+        }
+
         function displaySpeechAnalysisResults(results, composite) {
             const lang = translations[currentLang];
 
@@ -3175,7 +3506,11 @@
             let totalWpm = 0;
             let totalPauses = 0;
             let totalLexicalDiversity = 0;
+            let totalLatency = 0;
+            let totalDisfluency = 0;
             let count = 0;
+            let latencyCount = 0;
+            let disfluencyCount = 0;
 
             results.forEach(r => {
                 if (r.features) {
@@ -3185,14 +3520,38 @@
                     }
                     if (r.features.pauseCount) totalPauses += r.features.pauseCount;
                     if (r.features.lexicalDiversity) totalLexicalDiversity += r.features.lexicalDiversity;
+                    if (r.features.responseLatency) {
+                        totalLatency += r.features.responseLatency;
+                        latencyCount++;
+                    }
+                }
+                if (r.extended_features && r.extended_features.disfluencyRate) {
+                    totalDisfluency += r.extended_features.disfluencyRate;
+                    disfluencyCount++;
                 }
             });
 
             const avgWpm = count > 0 ? Math.round(totalWpm / count) : 0;
-            const avgLexical = count > 0 ? Math.round((totalLexicalDiversity / count) * 100) : 0;
+            const avgLexical = count > 0 ? (totalLexicalDiversity / count) : 0;
+            const avgLatency = latencyCount > 0 ? (totalLatency / latencyCount) : null;
+            const avgDisfluency = disfluencyCount > 0 ? (totalDisfluency / disfluencyCount) : null;
+
+            // Calculate and display warning degree based on aggregated features
+            const aggregatedFeatures = {
+                speechRate: avgWpm,
+                pauseCount: totalPauses,
+                lexicalDiversity: avgLexical,
+                responseLatency: avgLatency
+            };
+            const aggregatedExtended = {
+                disfluencyRate: avgDisfluency
+            };
+            const warningDegree = calculateClientWarningDegree(aggregatedFeatures, aggregatedExtended);
+            displayWarningDegree(warningDegree);
 
             // Populate summary grid
             const summaryGrid = document.getElementById('vaSummaryGrid');
+            const lexicalPercent = Math.round(avgLexical * 100);
             summaryGrid.innerHTML = `
                 <div class="va-stat-card">
                     <div class="va-stat-value">${avgWpm}</div>
@@ -3203,7 +3562,7 @@
                     <div class="va-stat-label">${lang['va-pauses'] || 'Pauses'} (${lang['va-total'] || 'total'})</div>
                 </div>
                 <div class="va-stat-card">
-                    <div class="va-stat-value">${avgLexical}%</div>
+                    <div class="va-stat-value">${lexicalPercent}%</div>
                     <div class="va-stat-label">${lang['va-word-variety'] || 'Word Variety'}</div>
                 </div>
             `;
@@ -3624,34 +3983,59 @@
             currentIndex: 0,
             taps: 0,
             errors: 0,
+            hits: 0,
+            misses: 0,
             currentLetter: '',
-            timer: null
+            timer: null,
+            canTap: true,
+            isRunning: false
         };
 
         function startVigilanceTest() {
             document.getElementById('vigilancePhase1').style.display = 'none';
             document.getElementById('vigilancePhase2').style.display = 'block';
+
+            // Reset vigilance data
             vigilanceData = {
                 sequence: 'FBACMNAAJKLBAFAKDEAAAJAMOFAAB'.split(''),
                 currentIndex: 0,
                 taps: 0,
                 errors: 0,
+                hits: 0,
+                misses: 0,
                 currentLetter: '',
-                timer: null
+                timer: null,
+                canTap: true,
+                isRunning: true
             };
+
             document.getElementById('vigilanceTapCount').textContent = '0';
-            showNextLetter();
+            document.getElementById('vigilanceTapBtn').disabled = false;
+
+            // Small delay before starting
+            setTimeout(() => {
+                showNextLetter();
+            }, 500);
         }
 
         function showNextLetter() {
+            if (!vigilanceData.isRunning) return;
+
             if (vigilanceData.currentIndex < vigilanceData.sequence.length) {
                 vigilanceData.currentLetter = vigilanceData.sequence[vigilanceData.currentIndex];
+                vigilanceData.canTap = true;
                 document.getElementById('vigilanceLetter').textContent = vigilanceData.currentLetter;
                 updateProgress('vigilanceProgress', (vigilanceData.currentIndex / vigilanceData.sequence.length) * 100);
 
+                // Clear any existing timer
+                if (vigilanceData.timer) {
+                    clearTimeout(vigilanceData.timer);
+                }
+
                 vigilanceData.timer = setTimeout(() => {
                     // If letter was A and user didn't tap, count as miss
-                    if (vigilanceData.currentLetter === 'A') {
+                    if (vigilanceData.currentLetter === 'A' && vigilanceData.canTap) {
+                        vigilanceData.misses++;
                         vigilanceData.errors++;
                     }
                     vigilanceData.currentIndex++;
@@ -3663,23 +4047,46 @@
         }
 
         function vigilanceTap() {
+            if (!vigilanceData.isRunning || !vigilanceData.canTap) return;
+
             vigilanceData.taps++;
+            vigilanceData.canTap = false; // Prevent double taps on same letter
             document.getElementById('vigilanceTapCount').textContent = vigilanceData.taps;
 
             if (vigilanceData.currentLetter === 'A') {
                 // Correct tap - clear the timeout so we don't count it as a miss
+                vigilanceData.hits++;
                 clearTimeout(vigilanceData.timer);
                 vigilanceData.currentIndex++;
-                showNextLetter();
+                // Small delay before showing next letter to prevent accidental double-tap
+                setTimeout(() => showNextLetter(), 200);
             } else {
-                // False positive
+                // False positive - tapped when shouldn't have
                 vigilanceData.errors++;
             }
         }
 
         async function finishVigilanceTest() {
+            vigilanceData.isRunning = false;
+
+            // Clear any remaining timer
+            if (vigilanceData.timer) {
+                clearTimeout(vigilanceData.timer);
+            }
+
             document.getElementById('vigilanceLetter').textContent = 'Done!';
             document.getElementById('vigilanceTapBtn').disabled = true;
+
+            // Calculate total errors (false positives + misses)
+            // MoCA scoring: Pass if <2 total errors
+            const totalErrors = vigilanceData.errors;
+
+            console.log('Vigilance test results:', {
+                taps: vigilanceData.taps,
+                hits: vigilanceData.hits,
+                misses: vigilanceData.misses,
+                errors: totalErrors
+            });
 
             try {
                 const response = await fetch(`${API_URL}?action=score-test`, {
@@ -3689,24 +4096,29 @@
                         testType: 'vigilance',
                         responses: {
                             taps: vigilanceData.taps,
-                            errors: vigilanceData.errors
+                            hits: vigilanceData.hits,
+                            misses: vigilanceData.misses,
+                            errors: totalErrors
                         }
                     })
                 });
                 const data = await response.json();
 
                 testResults.vigilance = {
-                    score: data.result.score.mocaPoints,
+                    score: data.result?.score?.mocaPoints ?? (totalErrors < 2 ? 1 : 0),
                     taps: vigilanceData.taps,
-                    errors: vigilanceData.errors,
-                    passed: data.result.interpretation.passed
+                    hits: vigilanceData.hits,
+                    errors: totalErrors,
+                    passed: data.result?.interpretation?.passed ?? (totalErrors < 2)
                 };
             } catch (error) {
+                console.log('Vigilance scoring fallback:', error);
                 testResults.vigilance = {
-                    score: vigilanceData.errors < 2 ? 1 : 0,
+                    score: totalErrors < 2 ? 1 : 0,
                     taps: vigilanceData.taps,
-                    errors: vigilanceData.errors,
-                    passed: vigilanceData.errors < 2
+                    hits: vigilanceData.hits,
+                    errors: totalErrors,
+                    passed: totalErrors < 2
                 };
             }
 
@@ -3823,8 +4235,10 @@
 
                 if (timeRemaining <= 0) {
                     clearInterval(letterFluencyTimer);
-                    input.disabled = true;
-                    finishLetterFluencyTest();
+                    document.getElementById('letterFluencyTimer').textContent = "Time's up!";
+                    // Show submit button instead of auto-submitting
+                    document.getElementById('letterFluencySubmitBtn').style.display = 'block';
+                    document.getElementById('letterFluencySubmitBtn').classList.add('pulse-animation');
                 }
             }, 1000);
         }
@@ -3863,6 +4277,21 @@
         }
 
         async function finishLetterFluencyTest() {
+            // Disable submit button to prevent double submission
+            const submitBtn = document.getElementById('letterFluencySubmitBtn');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Submitting...';
+            }
+
+            // Stop timer if still running
+            if (letterFluencyTimer) {
+                clearInterval(letterFluencyTimer);
+            }
+
+            // Disable input
+            document.getElementById('letterFluencyInput').disabled = true;
+
             try {
                 const response = await fetch(`${API_URL}?action=score-test`, {
                     method: 'POST',
@@ -3985,7 +4414,8 @@
                         body: JSON.stringify({
                             audio: base64Audio,
                             language: currentLang,
-                            verboseOutput: hasConsent // Request word-level timestamps if consented
+                            verboseOutput: hasConsent, // Request word-level timestamps if consented
+                            testType: currentTest // Pass test type for context-aware transcription
                         })
                     });
 

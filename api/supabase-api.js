@@ -1220,6 +1220,121 @@ class SpeechSignalCalculator {
         if (score >= 30) return 'Notable variation in some speech patterns';
         return 'Speech patterns showed variation from typical ranges';
     }
+
+    /**
+     * Calculate warning degree based on speech metrics
+     * Returns a score from 0-100 where:
+     *   0-30: Low concern (green)
+     *   31-60: Moderate concern (yellow)
+     *   61-100: Higher concern (red)
+     *
+     * Note: Pauses have reduced weight as they may be natural thinking time
+     */
+    static calculateWarningDegree(features, extendedFeatures = {}) {
+        if (!features) return { degree: null, level: 'unknown', factors: [] };
+
+        const factors = [];
+        let totalScore = 0;
+        let totalWeight = 0;
+
+        // Speech rate - important metric
+        // Low speech rate may indicate difficulty
+        if (features.speechRate !== null && features.speechRate !== undefined) {
+            const rate = features.speechRate;
+            let rateScore = 0;
+            if (rate < 80) rateScore = 80; // Very slow
+            else if (rate < 100) rateScore = 50; // Slow
+            else if (rate < 120) rateScore = 20; // Slightly slow
+            else rateScore = 0; // Normal
+
+            if (rateScore > 30) factors.push({ metric: 'speechRate', value: rate, note: 'Lower than typical range' });
+            totalScore += rateScore * 0.30; // 30% weight
+            totalWeight += 0.30;
+        }
+
+        // Pause count - REDUCED weight (0.10) as pauses can be natural
+        if (features.pauseCount !== null && features.pauseCount !== undefined) {
+            const pauses = features.pauseCount;
+            let pauseScore = 0;
+            if (pauses > 15) pauseScore = 70;
+            else if (pauses > 10) pauseScore = 40;
+            else if (pauses > 5) pauseScore = 15;
+            else pauseScore = 0;
+
+            if (pauseScore > 30) factors.push({ metric: 'pauseCount', value: pauses, note: 'More pauses than typical' });
+            totalScore += pauseScore * 0.10; // Only 10% weight for pauses
+            totalWeight += 0.10;
+        }
+
+        // Lexical diversity - important for fluency tests
+        if (features.lexicalDiversity !== null && features.lexicalDiversity !== undefined) {
+            const diversity = features.lexicalDiversity;
+            let diversityScore = 0;
+            if (diversity < 0.3) diversityScore = 70;
+            else if (diversity < 0.5) diversityScore = 40;
+            else if (diversity < 0.6) diversityScore = 15;
+            else diversityScore = 0;
+
+            if (diversityScore > 30) factors.push({ metric: 'lexicalDiversity', value: (diversity * 100).toFixed(0) + '%', note: 'Lower word variety' });
+            totalScore += diversityScore * 0.20; // 20% weight
+            totalWeight += 0.20;
+        }
+
+        // Response latency - higher weight
+        if (features.responseLatency !== null && features.responseLatency !== undefined) {
+            const latency = features.responseLatency;
+            let latencyScore = 0;
+            if (latency > 5) latencyScore = 80;
+            else if (latency > 3) latencyScore = 50;
+            else if (latency > 2) latencyScore = 20;
+            else latencyScore = 0;
+
+            if (latencyScore > 30) factors.push({ metric: 'responseLatency', value: latency.toFixed(1) + 's', note: 'Slower initial response' });
+            totalScore += latencyScore * 0.25; // 25% weight
+            totalWeight += 0.25;
+        }
+
+        // Disfluency rate - if available from extended features
+        if (extendedFeatures.disfluencyRate !== null && extendedFeatures.disfluencyRate !== undefined) {
+            const disfluency = extendedFeatures.disfluencyRate;
+            let disfluencyScore = 0;
+            if (disfluency > 0.2) disfluencyScore = 70;
+            else if (disfluency > 0.1) disfluencyScore = 40;
+            else if (disfluency > 0.05) disfluencyScore = 15;
+            else disfluencyScore = 0;
+
+            if (disfluencyScore > 30) factors.push({ metric: 'disfluencyRate', value: (disfluency * 100).toFixed(0) + '%', note: 'Higher disfluency rate' });
+            totalScore += disfluencyScore * 0.15; // 15% weight
+            totalWeight += 0.15;
+        }
+
+        // Calculate final degree
+        const degree = totalWeight > 0 ? Math.round(totalScore / totalWeight) : null;
+
+        // Determine warning level
+        let level = 'unknown';
+        let message = '';
+        if (degree !== null) {
+            if (degree <= 30) {
+                level = 'low';
+                message = 'Speech patterns are within commonly observed ranges.';
+            } else if (degree <= 60) {
+                level = 'moderate';
+                message = 'Some speech patterns vary from typical ranges. This may reflect natural variation.';
+            } else {
+                level = 'elevated';
+                message = 'Speech patterns show notable variation. Consider discussing with a healthcare provider if concerned.';
+            }
+        }
+
+        return {
+            degree,
+            level,
+            message,
+            factors,
+            disclaimer: 'This is an experimental metric and NOT a diagnostic indicator. Many factors affect speech patterns including fatigue, stress, or environment.'
+        };
+    }
 }
 
 // ============= MAIN HANDLER =============
@@ -1505,7 +1620,7 @@ export default async function handler(req, res) {
                 const body = req.body || {};
                 validateRequired(['audio'], body);
 
-                const { audio, language = 'en', verboseOutput = false } = body;
+                const { audio, language = 'en', verboseOutput = false, testType = null } = body;
 
                 // Decode base64 audio
                 const audioBuffer = Buffer.from(audio, 'base64');
@@ -1516,6 +1631,22 @@ export default async function handler(req, res) {
                 formData.append('file', blob, 'audio.webm');
                 formData.append('model', 'whisper-1');
                 formData.append('language', language);
+
+                // Add test-specific prompts to help Whisper understand context
+                // This helps filter out filler words and non-relevant speech
+                const testPrompts = {
+                    'fluency': 'This is a cognitive test where the speaker lists animal names. Transcribe only the animal names mentioned, separated by commas. Ignore filler words like "um", "uh", "let me think", "I\'m thinking", or conversational phrases.',
+                    'letterFluency': 'This is a cognitive test where the speaker lists words starting with the letter F. Transcribe only words that start with F, separated by commas. Ignore filler words, thinking phrases like "um", "uh", "let me see", or meta-commentary.',
+                    'letter-fluency': 'This is a cognitive test where the speaker lists words starting with the letter F. Transcribe only words that start with F, separated by commas. Ignore filler words, thinking phrases like "um", "uh", "let me see", or meta-commentary.',
+                    'memory': 'This is a memory recall test. Transcribe the words the speaker is trying to recall, separated by commas.',
+                    'naming': 'This is a naming test where the speaker identifies animals. Transcribe only the animal names mentioned.',
+                    'repetition': 'This is a sentence repetition test. Transcribe the exact sentence the speaker says.',
+                    'abstraction': 'This is an abstraction test where the speaker describes similarities between items. Transcribe their response.'
+                };
+
+                if (testType && testPrompts[testType]) {
+                    formData.append('prompt', testPrompts[testType]);
+                }
 
                 // Request verbose output with word timestamps if needed for speech analysis
                 if (verboseOutput) {
@@ -1627,6 +1758,12 @@ export default async function handler(req, res) {
                     testType
                 );
 
+                // Calculate warning degree (with reduced pause weight)
+                const warningDegree = SpeechSignalCalculator.calculateWarningDegree(
+                    features,
+                    extendedFeatures
+                );
+
                 // Save to database with extended features
                 try {
                     await supabaseRequest('speech_analysis', 'POST', {
@@ -1651,7 +1788,8 @@ export default async function handler(req, res) {
                     features,
                     extendedFeatures,
                     interpretation,
-                    taskSignal
+                    taskSignal,
+                    warningDegree
                 });
             }
 
