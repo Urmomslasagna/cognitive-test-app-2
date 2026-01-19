@@ -3988,7 +3988,8 @@
             currentLetter: '',
             timer: null,
             canTap: true,
-            isRunning: false
+            isRunning: false,
+            transitioning: false
         };
 
         function startVigilanceTest() {
@@ -4006,7 +4007,8 @@
                 currentLetter: '',
                 timer: null,
                 canTap: true,
-                isRunning: true
+                isRunning: true,
+                transitioning: false
             };
 
             document.getElementById('vigilanceTapCount').textContent = '0';
@@ -4019,6 +4021,9 @@
         }
 
         function showNextLetter() {
+            // Reset transitioning flag at the start of showing a new letter
+            vigilanceData.transitioning = false;
+
             if (!vigilanceData.isRunning) return;
 
             if (vigilanceData.currentIndex < vigilanceData.sequence.length) {
@@ -4030,33 +4035,36 @@
                 // Clear any existing timer
                 if (vigilanceData.timer) {
                     clearTimeout(vigilanceData.timer);
+                    vigilanceData.timer = null;
                 }
 
                 vigilanceData.timer = setTimeout(() => {
-                    // If letter was A and user didn't tap, count as miss
-                    if (vigilanceData.currentLetter === 'A' && vigilanceData.canTap) {
+                    // Only count as miss if we're not transitioning and canTap is still true
+                    if (!vigilanceData.transitioning && vigilanceData.currentLetter === 'A' && vigilanceData.canTap) {
                         vigilanceData.misses++;
                         vigilanceData.errors++;
                     }
                     vigilanceData.currentIndex++;
                     showNextLetter();
-                }, 1000);
+                }, 1200);
             } else {
                 finishVigilanceTest();
             }
         }
 
         function vigilanceTap() {
-            if (!vigilanceData.isRunning || !vigilanceData.canTap) return;
+            if (!vigilanceData.isRunning || !vigilanceData.canTap || vigilanceData.transitioning) return;
 
             vigilanceData.taps++;
             vigilanceData.canTap = false; // Prevent double taps on same letter
             document.getElementById('vigilanceTapCount').textContent = vigilanceData.taps;
 
             if (vigilanceData.currentLetter === 'A') {
-                // Correct tap - clear the timeout so we don't count it as a miss
-                vigilanceData.hits++;
+                // Correct tap - clear the timeout FIRST to prevent race condition
                 clearTimeout(vigilanceData.timer);
+                vigilanceData.timer = null;
+                vigilanceData.hits++;
+                vigilanceData.transitioning = true; // Prevent any further interactions during transition
                 vigilanceData.currentIndex++;
                 // Small delay before showing next letter to prevent accidental double-tap
                 setTimeout(() => showNextLetter(), 200);
